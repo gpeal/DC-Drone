@@ -1,16 +1,16 @@
-#include "debug.h"
+#include <Servo.h>
 
-Debug debug;
+#include "brain.h"
+
+Brain brain;
 
 void setup()
 {
-  debug = Debug();
+  brain = Brain();
 
 }
 
 void loop()
 {
-  debug.log("log");
-  debug.logl(WARN, "warn");
-  delay(1000);
+  brain.loop();
 }
