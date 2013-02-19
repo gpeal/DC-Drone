@@ -4,7 +4,6 @@
 #include <Servo.h>
 
 #include "debug.h"
-#include "tracker.h"
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 1

@@ -2,15 +2,14 @@
 
 #include "brain.h"
 
-Brain brain;
+Brain *brain;
 
 void setup()
 {
-  brain = Brain();
-
+  brain = new Brain();
 }
 
 void loop()
 {
-  brain.loop();
+  brain->loop();
 }
