@@ -1,7 +1,7 @@
 #include <Servo.h>
 
-#include "debug.h"
-#include "tracker.h"
+#include "Debug.h"
+#include "Tracker.h"
 
 Debug *debug;
 Tracker *tracker;

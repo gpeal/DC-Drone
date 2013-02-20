@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "tracker.h"
+#include "Tracker.h"
 #include <stdlib.h>
 
 Tracker::Tracker(int _mode, int _edge)
