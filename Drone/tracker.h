@@ -16,7 +16,7 @@ class Tracker
 {
   public:
     Tracker();
-    Tracker(int _mode, int _edge_mode, int _laser_pin);
+    Tracker(int _mode, int _edge_mode, int _laser_pin, int _transistor_pin);
     void loop(void);
   private:
     // void move_servo(void);
@@ -27,10 +27,13 @@ class Tracker
     // determines which edge is being tracked
     const int edge;
     const int laser_pin;
+    const int transistor_pin;
 
     int pos;
     Servo *servo;
     Timer *laser_timer;
+
+    int last_transistor_reading;
 };
 
 #endif

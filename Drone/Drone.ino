@@ -7,7 +7,7 @@ Tracker *tracker;
 
 void setup()
 {
-  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2);
+  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5);
   debug->log("Starting UP");
 }
 

@@ -2,10 +2,11 @@
 #include "Tracker.h"
 #include <stdlib.h>
 
-Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin)
+Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin)
   : edge_mode(_edge_mode),
     edge(_edge),
-    laser_pin(_laser_pin)
+    laser_pin(_laser_pin),
+    transistor_pin(_transistor_pin)
 {
 
   servo = new Servo();
@@ -15,7 +16,8 @@ Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin)
   laser_timer = new Timer();
   pinMode(laser_pin, OUTPUT);
   // laser_timer->oscillate(laser_pin, 100, LOW);
-  laser_timer->every(1000, this, toggle_laser_wrapper);
+  laser_timer->every(500, this, toggle_laser_wrapper);
+  last_transistor_reading = 0;
 }
 
 void Tracker::loop(void)
@@ -42,7 +44,20 @@ void Tracker::loop(void)
 
 void Tracker::toggle_laser()
 {
-  debug->log("Toggling Laser");
+  int reading = analogRead(transistor_pin);
+  int delta = reading - last_transistor_reading;
+  last_transistor_reading = reading;
+  // laser is off, invert the delta
+  if(digitalRead(laser_pin) == LOW)
+  {
+    debug->log("Reading LOW");
+    delta *= -1;
+  }
+  else
+  {
+    debug->log("Reading HIGH");
+  }
+  debug->log("Delta: %d", delta);
   *portInputRegister(digitalPinToPort(laser_pin)) = digitalPinToBitMask(laser_pin);
 }
 

@@ -11,9 +11,9 @@ class Debug
   public:
     Debug();
     // log msg back to computer but default to INFO level
-    void log(char *msg);
+    void log(char *fmt, ...);
 
-    void logl(char *level, char *msg);
+    void logl(char *level, char *fmt, ...);
 };
 
 static Debug *debug = NULL;
