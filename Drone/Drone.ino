@@ -1,15 +1,18 @@
 #include <Servo.h>
 
-#include "brain.h"
+#include "debug.h"
+#include "tracker.h"
 
-Brain *brain;
+Debug *debug;
+Tracker *tracker;
 
 void setup()
 {
-  brain = new Brain();
+  tracker = new Tracker(ONE_EDGE, LEFT_EDGE);
+  debug = new Debug();
 }
 
 void loop()
 {
-  brain->loop();
+  tracker->loop();
 }
