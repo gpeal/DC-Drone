@@ -13,6 +13,10 @@ void Debug::log(char *msg)
 
 void Debug::logl(char *level, char *msg)
 {
+  if(debug == NULL)
+  {
+    debug = new Debug();
+  }
   Serial.print(level);
   Serial.println(msg);
 }

@@ -42,7 +42,7 @@ void Event::update(void)
     switch (eventType)
     {
       case EVENT_EVERY:
-        (*callback)();
+        (*callback)(self);
         break;
 
       case EVENT_OSCILLATE:

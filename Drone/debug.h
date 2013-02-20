@@ -1,6 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include "Arduino.h"
+
 #define INFO "INFO: "
 #define WARN "WARN: "
 
@@ -13,6 +15,8 @@ class Debug
 
     void logl(char *level, char *msg);
 };
+
+static Debug *debug = NULL;
 
 #endif
 
