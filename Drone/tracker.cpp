@@ -44,11 +44,12 @@ void Tracker::loop(void)
 
 void Tracker::toggle_laser()
 {
+  int laser_value = digitalRead(laser_pin);
   int reading = analogRead(transistor_pin);
   int delta = reading - last_transistor_reading;
   last_transistor_reading = reading;
   // laser is off, invert the delta
-  if(digitalRead(laser_pin) == LOW)
+  if(laser_value == LOW)
   {
     debug->log("Reading LOW");
     delta *= -1;
@@ -57,8 +58,8 @@ void Tracker::toggle_laser()
   {
     debug->log("Reading HIGH");
   }
-  debug->log("Delta: %d", delta);
-  *portInputRegister(digitalPinToPort(laser_pin)) = digitalPinToBitMask(laser_pin);
+  debug->log("Delta: %d", reading);
+  digitalWrite(laser_pin, !laser_value);
 }
 
 void Tracker::toggle_laser_wrapper(void *self)
