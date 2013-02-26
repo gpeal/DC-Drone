@@ -16,7 +16,7 @@ Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin)
   laser_timer = new Timer();
   pinMode(laser_pin, OUTPUT);
   // laser_timer->oscillate(laser_pin, 100, LOW);
-  laser_timer->every(500, this, toggle_laser_wrapper);
+  laser_timer->every(50, this, toggle_laser_wrapper);
   last_transistor_reading = 0;
 }
 
@@ -51,14 +51,12 @@ void Tracker::toggle_laser()
   // laser is off, invert the delta
   if(laser_value == LOW)
   {
-    debug->log("Reading LOW");
     delta *= -1;
   }
   else
   {
-    debug->log("Reading HIGH");
   }
-  debug->log("Delta: %d", reading);
+  debug->log("%d", delta);
   digitalWrite(laser_pin, !laser_value);
 }
 
