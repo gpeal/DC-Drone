@@ -34,20 +34,20 @@ void Tracker::move_servo(Sensor *sensor, int direction)
 }
 
 
-void Tracker::move_servo(Sensor *sensor, int direction, int amount)
+void Tracker::move_servo(Sensor *sensor, int direction, float amount)
 {
-  if (direction == SERVO_LEFT && sensor->servo_pos > 0)
+  if (direction == SERVO_LEFT && sensor->servo_pos > SERVO_MIN_POS)
   {
     sensor->servo_pos -= amount;
     debug->log("Moving servo left");
   }
-  else if (direction == SERVO_RIGHT && sensor->servo_pos < 180)
+  else if (direction == SERVO_RIGHT && sensor->servo_pos < SERVO_MAX_POS)
   {
     sensor->servo_pos += amount;
     debug->log("Moving servo right");
   }
 
-  sensor->servo->write(sensor->servo_pos);
+  sensor->servo->writeMicroseconds(1000 + (1000.0/180.0) * sensor->servo_pos);
 }
 
 void Tracker::execute(void)
