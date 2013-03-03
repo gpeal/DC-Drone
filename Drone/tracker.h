@@ -4,7 +4,7 @@
 #include <Servo.h>
 
 #include "Debug.h"
-#include "Timer.h"
+#include "Metro.h"
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 1
@@ -17,6 +17,8 @@
 
 #define SERVO_MIN_POS 15
 #define SERVO_MAX_POS 165
+#define SERVO_MIN_SPEED 0.5
+#define SERVO_MAX_SPEED 1.0
 
 class Tracker
 {
@@ -35,12 +37,12 @@ class Tracker
       int servo_direction;
       // the threshold delta voltage in which the tracker will determine whether or not it is hitting a reflective object
       int last_reading;
-      int last_found_position;
+      int last_found_pos;
     }Sensor;
 
-    // void move_servo(void);
+    // does one sweep of the servo to determine what the reading threshold should be
+    void calibrate(void);
     void execute(void);
-    static void execute_wrapper(void *self);
     int make_reading(Sensor *sensor);
     void move_servo(Sensor *sensor, int direction);
     void move_servo(Sensor *sensor, int direction, float amount);
@@ -55,7 +57,7 @@ class Tracker
     const int transistor_pin;
 
     int reading_threshold;
-    Timer *laser_timer;
+    Metro *execute_timer;
     Sensor *left_sensor;
     Sensor *right_sensor;
 };
