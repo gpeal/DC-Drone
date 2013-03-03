@@ -13,7 +13,7 @@ Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin)
   left_sensor = new Sensor();
   left_sensor->servo = new Servo();
   left_sensor->servo->attach(9);
-  left_sensor->servo_pos = 90;
+  left_sensor->servo_pos = 0;
   left_sensor->servo->write(left_sensor->servo_pos);
   left_sensor->servo_direction = !edge;
   left_sensor->last_reading = 0;
@@ -28,7 +28,31 @@ Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin)
 
 void Tracker::calibrate(void)
 {
-  //TODO: do this
+  int min_deltas[] = {999, 999, 999, 999, 999};
+  int delta;
+
+  while(left_sensor->servo_pos < SERVO_MAX_POS)
+  {
+    if (execute_timer->check())
+    {
+        delta = make_reading(left_sensor);
+        debug->log("Delta: %d", delta);
+        if (delta < min_deltas[0] && delta != 0)
+          min_deltas[0] = delta;
+        else if (delta < min_deltas[1] && delta != 0)
+          min_deltas[1] = delta;
+        else if (delta < min_deltas[2] && delta != 0)
+          min_deltas[2] = delta;
+        else if (delta < min_deltas[3] && delta != 0)
+          min_deltas[3] = delta;
+        else if (delta < min_deltas[4] && delta != 0)
+          min_deltas[4] = delta;
+        debug->log("Min Deltas: [%d, %d, %d, %d, %d]", min_deltas[0], min_deltas[1], min_deltas[2], min_deltas[3], min_deltas[4]);
+        move_servo(left_sensor, SERVO_RIGHT, 5);
+    }
+  }
+  reading_threshold = 4 * (min_deltas[0] + min_deltas[1] + min_deltas[2] + min_deltas[3] + min_deltas[4]) / 5.0;
+  debug->log("Reading threshold: %d", reading_threshold);
 }
 
 void Tracker::loop(void)
@@ -63,14 +87,7 @@ void Tracker::execute(void)
 {
   int delta;
   float servo_speed;
-  if (edge_mode == RIGHT_EDGE)
-  {
-    delta = make_reading(right_sensor);
-  }
-  else if (edge_mode == LEFT_EDGE)
-  {
-    delta = make_reading(left_sensor);
-  }
+  delta = make_reading(left_sensor);
 
   if (delta < reading_threshold)
   {
@@ -87,14 +104,12 @@ void Tracker::execute(void)
   else // hit target
   {
     left_sensor->last_found_pos = left_sensor->servo_pos;
-    if (left_sensor, edge_mode == LEFT_EDGE)
-    {
-      move_servo(left_sensor, SERVO_LEFT, 0.2);
-      left_sensor->servo_direction = SERVO_RIGHT;
-    }
+    servo_speed = SERVO_MAX_SPEED;
+    move_servo(left_sensor, SERVO_LEFT, servo_speed);
+    left_sensor->servo_direction = SERVO_RIGHT;
     // TODO: add both edges
   }
-  debug->log("Delta: %d\tServo Pos: %d\tServo Speed: %d", delta, left_sensor->servo_pos, servo_speed);
+  debug->log("Delta: %d\tServo Pos: %d\tServo Speed: %d", delta, (int)(100*left_sensor->servo_pos), (int)(100*servo_speed));
 }
 
 void Tracker::reverse_servo(Sensor *sensor)
