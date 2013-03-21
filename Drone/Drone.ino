@@ -12,7 +12,7 @@ Motor *motor;
 void setup()
 {
   // tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5);
-  motor = new Motor(2, 3, 4);
+  motor = new Motor(5, 6, 7);
   debug->log("Starting UP");
   motor->set(255, CW);
 
