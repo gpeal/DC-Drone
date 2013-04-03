@@ -1,9 +1,12 @@
 #include "Communication.h"
+#include "Debug.h"
+#include "Drone.h"
 
 void Xbee::setup(void)
 {
+  comm = SoftwareSerial(XBEE_RX, XBEE_TX);
   input_buffer_index = 0;
-  serial.begin(57600);
+  comm.begin(57600);
 }
 
 /**
@@ -11,33 +14,29 @@ void Xbee::setup(void)
  * on the bus, it adds it to the current input buffer. It has to do this because there is no equivalent
  * for serial.readln. It also increments the read state when it receives a delimiter.
  *
- * @return Message returns a parsed message after receiving a complete message. NULL otherwise.
+ * @return Message_t returns a parsed message after receiving a complete message. NULL_MESSAGE otherwise.
  */
-Message Xbee::loop(void)
+Message_t *Xbee::loop(void)
 {
   char input_char;
-  Message message;
+  Message_t *message;
 
-  if (serial.available())
+  if (comm.available())
   {
-    input_char = serial.read();
+    input_char = comm.read();
     input_buffer[input_buffer_index++] = input_char;
     if (input_char == DELIMITER)
     {
-      // message end
-      if (MessageReadState == PAYLOAD)
+      if (message_read_state == PAYLOAD)
       {
+        message_read_state = TO;
         message = parse_message(input_buffer);
-        if (message)
+        if (message == NULL)
         {
-          return message;
-        }
-        // there was an error parsing the message
-        else
-        {
-          debug->error("There was an error parsing the message: %s", input_buffer);
+          debug->log("Message was discarded: %s", input_buffer);
           return NULL;
         }
+        return message;
       }
     }
   }
@@ -51,9 +50,30 @@ Message Xbee::loop(void)
  * @param char * input should be in the form of
  *   TO_ID DELIMITER FROM_ID DELIMITER MESSAGE_TYPE DELIMITER PAYLOAD delimiter
  *
- * @return Message the parsed message object
+ * @return Message_t the parsed message object
  */
-Message Xbee::parse_message(char *input)
+Message_t *Xbee::parse_message(char *input)
 {
+  Message_t *message;
+  message = (Message_t *)malloc(sizeof(message));
 
+  MessageReadState state;
+  char temp[MAX_PAYLOAD_LENGTH];
+  // string formatter for sscanf to decode the message
+  char formatter[100];
+  int num_matched;
+
+  sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, DELIMITER);
+  num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
+  if (num_matched != 4)
+  {
+    free(message);
+    return (Message_t *)INCORRECT_ID_ERROR;
+  }
+  else if(message->to != DRONE_ID)
+  {
+    free(message);
+    return (Message_t *)INCORRECT_ID_ERROR;
+  }
+  return message;
 }

@@ -5,6 +5,7 @@
 
 #define INFO "INFO: "
 #define WARN "WARN: "
+#define ERROR "ERROR: "
 
 class Debug
 {

@@ -1,14 +1,22 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 
-#include <SoftwareSerial.h>
+#include "SoftwareSerial.h"
 
 #define XBEE_RX 8
 #define XBEE_TX 9
 #define MAX_PAYLOAD_LENGTH 256
+// message parse errors
+#define PARSE_ERROR 0
+#define INCORRECT_ID_ERROR 1
+// include enough space for the payload plus the to id, from id, message type, their delimiters
+// plus another 7 just to be safe :)
+#define MAX_MESSAGE_LENGTH MAX_PAYLOAD_LENGTH + 7 + 7
 #define DELIMITER ';'
 
-typedef struct Message
+
+//TODO: make this a class with inheritance
+typedef struct Message_t
 {
   int to;
   int from;
@@ -18,25 +26,24 @@ typedef struct Message
 
 class Xbee
 {
-  static SoftwareSerial serial(XBEE_RX, XBEE_TX);
+  static SoftwareSerial comm;
   // we can only read one character at a time from the xbee so
   // we incrementally save the results to a buffer
   static int input_buffer_index;
-  // include enough space for the payload plus the to id, from id, message type, their delimiters
-  // plus another 7 just to be safe :)
-  static char input_buffer[MAX_PAYLOAD_LENGTH + 7 + 7];
+  static char input_buffer[MAX_MESSAGE_LENGTH];
   // keep track of what part of the message we are currently waiting for/reading
-  enum
+  enum MessageReadState
   {
     TO,
     FROM,
     TYPE,
     PAYLOAD
-  } MessageReadState;
+  };
+  static MessageReadState message_read_state;
 
   static void setup(void);
-  static Message loop(void);
-  static Message parse_message(char *input);
+  static Message_t *loop(void);
+  static Message_t *parse_message(char *input);
 };
 
 #endif
