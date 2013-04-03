@@ -24,13 +24,8 @@ typedef struct Message_t
   char payload[MAX_PAYLOAD_LENGTH];
 };
 
-class Xbee
+class Comm
 {
-  static SoftwareSerial comm;
-  // we can only read one character at a time from the xbee so
-  // we incrementally save the results to a buffer
-  static int input_buffer_index;
-  static char input_buffer[MAX_MESSAGE_LENGTH];
   // keep track of what part of the message we are currently waiting for/reading
   enum MessageReadState
   {
@@ -39,6 +34,12 @@ class Xbee
     TYPE,
     PAYLOAD
   };
+
+  static SoftwareSerial comm;
+  // we can only read one character at a time from the xbee so
+  // we incrementally save the results to a buffer
+  static int input_buffer_index;
+  static char input_buffer[MAX_MESSAGE_LENGTH];
   static MessageReadState message_read_state;
 
   static void setup(void);

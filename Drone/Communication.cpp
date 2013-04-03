@@ -2,7 +2,7 @@
 #include "Debug.h"
 #include "Drone.h"
 
-void Xbee::setup(void)
+void Comm::setup(void)
 {
   comm = SoftwareSerial(XBEE_RX, XBEE_TX);
   input_buffer_index = 0;
@@ -10,13 +10,13 @@ void Xbee::setup(void)
 }
 
 /**
- * Xbee::loop checks the xbee serial port for new characters. If there is a character waiting
+ * Comm::loop checks the Comm serial port for new characters. If there is a character waiting
  * on the bus, it adds it to the current input buffer. It has to do this because there is no equivalent
  * for serial.readln. It also increments the read state when it receives a delimiter.
  *
  * @return Message_t returns a parsed message after receiving a complete message. NULL_MESSAGE otherwise.
  */
-Message_t *Xbee::loop(void)
+Message_t *Comm::loop(void)
 {
   char input_char;
   Message_t *message;
@@ -45,14 +45,14 @@ Message_t *Xbee::loop(void)
 }
 
 /**
- * Xbee::parse_message takes an input buffer and returns a parsed message object
+ * Comm::parse_message takes an input buffer and returns a parsed message object
  *
  * @param char * input should be in the form of
  *   TO_ID DELIMITER FROM_ID DELIMITER MESSAGE_TYPE DELIMITER PAYLOAD delimiter
  *
  * @return Message_t the parsed message object
  */
-Message_t *Xbee::parse_message(char *input)
+Message_t *Comm::parse_message(char *input)
 {
   Message_t *message;
   message = (Message_t *)malloc(sizeof(message));
