@@ -74,10 +74,9 @@ Message_t *Comm::parse_message(char *input)
   debug->log("Format string: %s", formatter);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
   debug->log("Parsed message (%d arguments): %s", num_matched, input);
-  debug->log("To: %d\tFrom: %d\tType: %d\tPayload: %s", message->to, message->from, message->type, message->payload);
   if (num_matched != 4)
   {
-    debug->logl(ERROR, "Error parsing message (parsed %d of 4 inputs)", num_matched);
+    debug->logl(ERROR, "Error parsing message (parsed %d of 4 inputs) ", num_matched);
     message->type = -1;
     strcpy(message->payload, "Error parsing message");
   }

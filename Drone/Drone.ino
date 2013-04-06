@@ -64,7 +64,8 @@ void delegate_message(Message_t *message)
       heartbeat_message->to = 0;
       heartbeat_message->type = MT_HEARTBEAT;
       queen->send(heartbeat_message);
-      debug->log("Sent heartbeat");
+      debug->log("Sent heartbeat (FM: %d)", freeMemory());
       break;
   }
+  delete message;
 }
