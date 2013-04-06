@@ -4,7 +4,7 @@
 
 #define XBEE_RX 9
 #define XBEE_TX 10
-#define MAX_PAYLOAD_LENGTH 256
+#define MAX_PAYLOAD_LENGTH 32
 // message parse errors
 #define PARSE_ERROR 0
 #define INCORRECT_ID_ERROR 1

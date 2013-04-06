@@ -1,6 +1,7 @@
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
+#include "MemoryFree.h"
 
 Comm::Comm(int rx, int tx)
 {
@@ -34,7 +35,6 @@ Message_t *Comm::loop(void)
     input_char = comm->read();
     // input_buffer[input_buffer_index++] = input_char;
     strncat(input_buffer, &input_char, 1);
-    debug->log("Input buffer: %s (FM: )", input_buffer);
     if (input_char == END_DELIMITER)
     {
     //   strncat(input_buffer, "\0", 1);
@@ -99,10 +99,6 @@ void Comm::send(Message_t *message)
 {
   char buffer[MAX_MESSAGE_LENGTH];
   int ret;
-  ret = sprintf(buffer, "%d%c%d%c%d%c%s%c", message->to, DELIMITER, message->from, DELIMITER, message->type, DELIMITER, message->payload, END_DELIMITER);
-  if (ret != 8)
-  {
-    debug->logl(ERROR, "Only parsed %d arguments from message (out of 8)", ret);
-  }
+  sprintf(buffer, "%d%c%d%c%d%c%s%c", message->to, DELIMITER, message->from, DELIMITER, message->type, DELIMITER, message->payload, END_DELIMITER);
   comm->print(buffer);
 }

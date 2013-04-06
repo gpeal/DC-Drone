@@ -3,12 +3,14 @@
 #include "Debug.h"
 #include "Drone.h"
 #include "Metro.h"
+#include "MemoryFree.h"
 #include "Motor.h"
 #include "Servo.h"
 #include "Tracker.h"
 
 // Tracker *tracker;
 Metro *motor_timer;
+Metro *free_memory_timer;
 // Motor *motor;
 Message_t *message;
 Comm *queen;
@@ -23,6 +25,7 @@ void setup()
   // motor->set(255, CW);
 
   motor_timer = new Metro(1000);
+  free_memory_timer = new Metro(100);
   heartbeat_message = new Message_t;
 
   queen = new Comm(2, 3);
@@ -39,6 +42,10 @@ void loop()
   if (message != NULL)
   {
     delegate_message(message);
+  }
+  if (free_memory_timer->check())
+  {
+    // debug->log("Free Memory: %d", freeMemory());
   }
 }
 

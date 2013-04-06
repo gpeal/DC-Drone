@@ -13,7 +13,7 @@ void Debug::log(char *fmt, ...)
     debug = new Debug();
   }
   va_list argList;
-  char buffer[512] = { 0 };
+  char buffer[64] = { 0 };
   va_start(argList, fmt);
   vsprintf(buffer, fmt, argList);
   va_end(argList);
@@ -29,7 +29,7 @@ void Debug::logl(char *level, char *fmt, ...)
     debug = new Debug();
   }
   va_list argList;
-  char buffer[512] = { 0 };
+  char buffer[64] = { 0 };
   va_start(argList, fmt);
   vsprintf(buffer, fmt, argList);
   va_end(argList);
