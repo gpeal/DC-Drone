@@ -1,6 +1,5 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
-
 #include "SoftwareSerial.h"
 
 #define XBEE_RX 9
@@ -13,6 +12,11 @@
 // plus another 7 just to be safe :)
 #define MAX_MESSAGE_LENGTH MAX_PAYLOAD_LENGTH + 7 + 7
 #define DELIMITER ';'
+#define END_DELIMITER '\n'
+
+// message types
+#define MT_HEARTBEAT_QUEEN 0
+#define MT_HEARTBEAT 1
 
 
 //TODO: make this a class with inheritance
@@ -30,22 +34,12 @@ public:
   Comm(int rx, int tx);
   void setup(int rx, int tx);
   Message_t *loop(void);
+  void send(Message_t *message);
 private:
-  // keep track of what part of the message we are currently waiting for/reading
-  enum MessageReadState
-  {
-    TO,
-    FROM,
-    TYPE,
-    PAYLOAD
-  };
-
   SoftwareSerial *comm;
   // we can only read one character at a time from the xbee so
   // we incrementally save the results to a buffer
-  int input_buffer_index;
   char input_buffer[MAX_MESSAGE_LENGTH];
-  MessageReadState message_read_state;
 
   Message_t *parse_message(char *input);
 };

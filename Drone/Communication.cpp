@@ -13,9 +13,8 @@ Comm::Comm(int rx, int tx)
     debug->log("Initializing Serial Rx: %d, Tx: %d", rx, tx);
   }
   comm = new SoftwareSerial(rx, tx);
-  input_buffer_index = 0;
+  input_buffer[0] = '\0';
   comm->begin(9600);
-  comm->println("Starting UP");
 }
 
 /**
@@ -33,21 +32,20 @@ Message_t *Comm::loop(void)
   if (comm->available())
   {
     input_char = comm->read();
-    debug->log("Received: %c", input_char);
-    input_buffer[input_buffer_index++] = input_char;
-    if (input_char == DELIMITER)
+    // input_buffer[input_buffer_index++] = input_char;
+    strncat(input_buffer, &input_char, 1);
+    debug->log("Input buffer: %s (FM: )", input_buffer);
+    if (input_char == END_DELIMITER)
     {
-      if (message_read_state == PAYLOAD)
+    //   strncat(input_buffer, "\0", 1);
+      message = parse_message(input_buffer);
+      input_buffer[0] = '\0';
+      if (message->type == -1)
       {
-        message_read_state = TO;
-        message = parse_message(input_buffer);
-        if (message == NULL)
-        {
-          debug->log("Message was discarded: %s", input_buffer);
-          return NULL;
-        }
-        return message;
+        debug->logl(ERROR, "Message returned with error: %s", message->payload);
+        return NULL;
       }
+      return message;
     }
   }
 
@@ -65,25 +63,46 @@ Message_t *Comm::loop(void)
 Message_t *Comm::parse_message(char *input)
 {
   Message_t *message;
-  message = (Message_t *)malloc(sizeof(message));
+  message = new Message_t;
 
-  MessageReadState state;
   char temp[MAX_PAYLOAD_LENGTH];
   // string formatter for sscanf to decode the message
   char formatter[100];
   int num_matched;
-
-  sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, DELIMITER);
+  debug->log("Parsing message: %s", input);
+  sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
+  debug->log("Format string: %s", formatter);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
+  debug->log("Parsed message (%d arguments): %s", num_matched, input);
+  debug->log("To: %d\tFrom: %d\tType: %d\tPayload: %s", message->to, message->from, message->type, message->payload);
   if (num_matched != 4)
   {
-    delete(message);
-    return (Message_t *)INCORRECT_ID_ERROR;
+    debug->logl(ERROR, "Error parsing message (parsed %d of 4 inputs)", num_matched);
+    message->type = -1;
+    strcpy(message->payload, "Error parsing message");
   }
   else if(message->to != DRONE_ID && message->to != 0)
   {
-    delete(message);
-    return (Message_t *)INCORRECT_ID_ERROR;
+    debug->logl(INFO, "Received a message for drone %d (I am %d)", message->to, DRONE_ID);
+    message->type = -1;
+    strcpy(message->payload, "Wrong drone");
   }
   return message;
+}
+
+/**
+ * Comm::send takes a Message_t pointer and sends it over serial
+ *
+ * @param message the message to be sent
+ */
+void Comm::send(Message_t *message)
+{
+  char buffer[MAX_MESSAGE_LENGTH];
+  int ret;
+  ret = sprintf(buffer, "%d%c%d%c%d%c%s%c", message->to, DELIMITER, message->from, DELIMITER, message->type, DELIMITER, message->payload, END_DELIMITER);
+  if (ret != 8)
+  {
+    debug->logl(ERROR, "Only parsed %d arguments from message (out of 8)", ret);
+  }
+  comm->print(buffer);
 }
