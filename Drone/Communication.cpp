@@ -2,11 +2,20 @@
 #include "Debug.h"
 #include "Drone.h"
 
-void Comm::setup(void)
+Comm::Comm(int rx, int tx)
 {
-  comm = SoftwareSerial(XBEE_RX, XBEE_TX);
+  if (comm->isListening())
+  {
+    debug->logl(ERROR, "Attempting to initialize comm port twice");
+  }
+  else
+  {
+    debug->log("Initializing Serial Rx: %d, Tx: %d", rx, tx);
+  }
+  comm = new SoftwareSerial(rx, tx);
   input_buffer_index = 0;
-  comm.begin(57600);
+  comm->begin(9600);
+  comm->println("Starting UP");
 }
 
 /**
@@ -21,9 +30,10 @@ Message_t *Comm::loop(void)
   char input_char;
   Message_t *message;
 
-  if (comm.available())
+  if (comm->available())
   {
-    input_char = comm.read();
+    input_char = comm->read();
+    debug->log("Received: %c", input_char);
     input_buffer[input_buffer_index++] = input_char;
     if (input_char == DELIMITER)
     {
@@ -67,12 +77,12 @@ Message_t *Comm::parse_message(char *input)
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
   if (num_matched != 4)
   {
-    free(message);
+    delete(message);
     return (Message_t *)INCORRECT_ID_ERROR;
   }
-  else if(message->to != DRONE_ID)
+  else if(message->to != DRONE_ID && message->to != 0)
   {
-    free(message);
+    delete(message);
     return (Message_t *)INCORRECT_ID_ERROR;
   }
   return message;

@@ -3,8 +3,8 @@
 
 #include "SoftwareSerial.h"
 
-#define XBEE_RX 8
-#define XBEE_TX 9
+#define XBEE_RX 9
+#define XBEE_TX 10
 #define MAX_PAYLOAD_LENGTH 256
 // message parse errors
 #define PARSE_ERROR 0
@@ -26,6 +26,11 @@ typedef struct Message_t
 
 class Comm
 {
+public:
+  Comm(int rx, int tx);
+  void setup(int rx, int tx);
+  Message_t *loop(void);
+private:
   // keep track of what part of the message we are currently waiting for/reading
   enum MessageReadState
   {
@@ -35,16 +40,14 @@ class Comm
     PAYLOAD
   };
 
-  static SoftwareSerial comm;
+  SoftwareSerial *comm;
   // we can only read one character at a time from the xbee so
   // we incrementally save the results to a buffer
-  static int input_buffer_index;
-  static char input_buffer[MAX_MESSAGE_LENGTH];
-  static MessageReadState message_read_state;
+  int input_buffer_index;
+  char input_buffer[MAX_MESSAGE_LENGTH];
+  MessageReadState message_read_state;
 
-  static void setup(void);
-  static Message_t *loop(void);
-  static Message_t *parse_message(char *input);
+  Message_t *parse_message(char *input);
 };
 
 #endif

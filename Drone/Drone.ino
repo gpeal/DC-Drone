@@ -10,6 +10,7 @@ Tracker *tracker;
 Metro *motor_timer;
 Motor *motor;
 Message_t *message;
+Comm *queen;
 
 void setup()
 {
@@ -20,7 +21,7 @@ void setup()
 
   motor_timer = new Metro(1000);
 
-  Comm->setup();
+  queen = new Comm(2, 3);
 }
 
 void loop()
@@ -29,7 +30,7 @@ void loop()
   {
     motor->set(255, (MotorDirection)!motor->direction);
   }
-  message = Comm->loop();
+  message = queen->loop();
   if (message != NULL)
   {
     delegate_message(message);
