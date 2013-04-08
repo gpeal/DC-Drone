@@ -71,7 +71,7 @@ Message_t *Comm::parse_message(char *input)
 
   char temp[MAX_PAYLOAD_LENGTH];
   // string formatter for sscanf to decode the message
-  char formatter[16];
+  char formatter[32];
   int num_matched;
   sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);

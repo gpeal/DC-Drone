@@ -17,7 +17,7 @@
 #define DUMMY_PAYLOAD "_"
 
 // message types
-#define MT_HEARTBEAT_QUEEN 0
+#define MT_INITIALIZE 0
 #define MT_HEARTBEAT 1
 
 

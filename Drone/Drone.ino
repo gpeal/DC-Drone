@@ -13,11 +13,10 @@
 Metro *motor_timer;
 Metro *free_memory_timer;
 // Motor *motor;
-Message_t *message;
 Comm *queen;
 StateMachine *sm;
 
-Message_t *heartbeat_message;
+Message_t *message;
 
 void setup()
 {
@@ -28,10 +27,13 @@ void setup()
 
   motor_timer = new Metro(1000);
   free_memory_timer = new Metro(1000);
-  heartbeat_message = new Message_t;
+  message = new Message_t;
 
   queen = new Comm(2, 3);
   sm = StateMachine::get_instance();
+  message->type = MT_INITIALIZE;
+  strcpy(message->payload, "TheFirstSwarm,9182,c,5.6");
+  delegate_message(message);
 }
 
 void loop()
@@ -55,6 +57,14 @@ void loop()
   }
 }
 
+void send_heartbeat(void)
+{
+  message->type = MT_HEARTBEAT;
+  sprintf(message->payload, "%d,%d", sm->get_state(), freeMemory());
+  queen->send(message);
+  debug->log("Sent heartbeat");
+}
+
 /**
  * delegate_message takes a Message_t struct and takes action on it
  *
@@ -62,17 +72,29 @@ void loop()
  */
 void delegate_message(Message_t *message)
 {
+  char str1[16];
+  char str2[16];
+  int int1 = 6;
+  float float1 = 6.66;
+  char char1 = '7';
+  char formatter[16];
+  int num_matched;
+  message->from = DRONE_ID;
+  message-> to = QUEEN_ID;
   switch(message->type)
   {
-    case 0:
-      // drone id, free memory
+    case MT_INITIALIZE:
+      debug->log("Initialize Received (%s)", message->payload);
+      sprintf(formatter, "%%[^%c]%c%%d%c%%c%c%%[^%c]", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
+      debug->log("Formatter: %s", formatter);
+      num_matched = sscanf(message->payload, formatter, str1, &int1, &char1, &str2);
+      float1 = atof(str2);
+      debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
+      send_heartbeat();
+      break;
+    case MT_HEARTBEAT:
       debug->log("Heartbeat Received");
-      heartbeat_message->from = DRONE_ID;
-      heartbeat_message->to = 0;
-      heartbeat_message->type = MT_HEARTBEAT;
-      sprintf(heartbeat_message->payload, "%d", sm->get_state());
-      queen->send(heartbeat_message);
-      debug->log("Sent heartbeat");
+      send_heartbeat();
       break;
   }
   delete message;
