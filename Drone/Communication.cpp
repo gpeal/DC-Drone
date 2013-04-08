@@ -73,9 +73,13 @@ Message_t *Comm::parse_message(char *input)
   // string formatter for sscanf to decode the message
   char formatter[16];
   int num_matched;
-  // debug->log("Parsing message: %s", input);
   sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
+  if (strcmp(message->payload, DUMMY_PAYLOAD) == 0)
+  {
+    strcpy(message->payload, "");
+  }
+
   if (num_matched != 4)
   {
     message->type = -1;
