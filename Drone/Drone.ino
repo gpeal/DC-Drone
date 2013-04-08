@@ -25,7 +25,7 @@ void setup()
   // motor->set(255, CW);
 
   motor_timer = new Metro(1000);
-  free_memory_timer = new Metro(100);
+  free_memory_timer = new Metro(1000);
   heartbeat_message = new Message_t;
 
   queen = new Comm(2, 3);
@@ -45,7 +45,10 @@ void loop()
   }
   if (free_memory_timer->check())
   {
-    // debug->log("Free Memory: %d", freeMemory());
+    if (freeMemory() < 500)
+    {
+      debug->log("Free Memory: %d", freeMemory());
+    }
   }
 }
 
@@ -59,12 +62,14 @@ void delegate_message(Message_t *message)
   switch(message->type)
   {
     case 0:
+      // drone id, free memory
       debug->log("Heartbeat Received");
       heartbeat_message->from = DRONE_ID;
       heartbeat_message->to = 0;
       heartbeat_message->type = MT_HEARTBEAT;
+      sprintf(heartbeat_message->payload, "");
       queen->send(heartbeat_message);
-      debug->log("Sent heartbeat (FM: %d)", freeMemory());
+      debug->log("Sent heartbeat");
       break;
   }
   delete message;

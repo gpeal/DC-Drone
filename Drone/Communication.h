@@ -12,6 +12,7 @@
 // plus another 7 just to be safe :)
 #define MAX_MESSAGE_LENGTH MAX_PAYLOAD_LENGTH + 7 + 7
 #define DELIMITER ';'
+#define PAYLOAD_DELIMITER ','
 #define END_DELIMITER '\n'
 
 // message types
