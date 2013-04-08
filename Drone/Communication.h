@@ -14,6 +14,7 @@
 #define DELIMITER ';'
 #define PAYLOAD_DELIMITER ','
 #define END_DELIMITER '\n'
+#define DUMMY_PAYLOAD "_"
 
 // message types
 #define MT_HEARTBEAT_QUEEN 0

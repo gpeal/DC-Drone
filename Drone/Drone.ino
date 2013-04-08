@@ -6,6 +6,7 @@
 #include "MemoryFree.h"
 #include "Motor.h"
 #include "Servo.h"
+#include "StateMachine.h"
 #include "Tracker.h"
 
 // Tracker *tracker;
@@ -14,6 +15,7 @@ Metro *free_memory_timer;
 // Motor *motor;
 Message_t *message;
 Comm *queen;
+StateMachine *sm;
 
 Message_t *heartbeat_message;
 
@@ -29,6 +31,7 @@ void setup()
   heartbeat_message = new Message_t;
 
   queen = new Comm(2, 3);
+  sm = StateMachine::get_instance();
 }
 
 void loop()
@@ -67,7 +70,7 @@ void delegate_message(Message_t *message)
       heartbeat_message->from = DRONE_ID;
       heartbeat_message->to = 0;
       heartbeat_message->type = MT_HEARTBEAT;
-      sprintf(heartbeat_message->payload, "");
+      sprintf(heartbeat_message->payload, "%d", sm->get_state());
       queen->send(heartbeat_message);
       debug->log("Sent heartbeat");
       break;

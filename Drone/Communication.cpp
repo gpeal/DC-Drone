@@ -37,12 +37,15 @@ Message_t *Comm::loop(void)
     strncat(input_buffer, &input_char, 1);
     if (input_char == END_DELIMITER)
     {
-      strncat(input_buffer, "\0", 1);
+      if(input_buffer[strlen(input_buffer) - 2] == DELIMITER)
+      {
+        sprintf(input_buffer, "%s%s\n", input_buffer, DUMMY_PAYLOAD);
+      }
       message = parse_message(input_buffer);
       input_buffer[0] = '\0';
       if (message->type == -1)
       {
-        debug->logl(ERROR, "Message returned with error: %s", message->payload);
+        debug->logl(ERROR, "%s", message->payload);
         delete message;
         return NULL;
       }
@@ -70,18 +73,18 @@ Message_t *Comm::parse_message(char *input)
   // string formatter for sscanf to decode the message
   char formatter[16];
   int num_matched;
-  debug->log("Parsing message: %s", input);
+  // debug->log("Parsing message: %s", input);
   sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
   if (num_matched != 4)
   {
     message->type = -1;
-    sprintf(message->payload, "Error parsing message (%d/4 args)", num_matched);
+    sprintf(message->payload, "MSG Parse Error (%d/4)", num_matched);
   }
   else if(message->to != DRONE_ID && message->to != 0)
   {
     message->type = -1;
-    strcpy(message->payload, "Wrong drone");
+    strcpy(message->payload, "MSG for wrong drone");
   }
   return message;
 }
