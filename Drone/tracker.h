@@ -21,7 +21,7 @@
 #define SERVO_MAX_SPEED 1.0
 
 #define SERVO_SEARCHING_SPEED 1
-#define SERVO_TRACKING_SPEED 0.5
+#define SERVO_TRACKING_SPEED 0.05
 
 class Tracker
 {
