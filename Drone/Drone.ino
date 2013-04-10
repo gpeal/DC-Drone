@@ -9,35 +9,30 @@
 #include "StateMachine.h"
 #include "Tracker.h"
 
-// Tracker *tracker;
+Tracker *tracker;
 Metro *motor_timer;
 Metro *free_memory_timer;
 // Motor *motor;
 Comm *queen;
-StateMachine *sm;
 
 Message_t *message;
 
 void setup()
 {
-  // tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5);
-  // motor = new Motor(5, 6, 7);
   debug->log("Starting UP");
+  queen = new Comm(3, 4);
+  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5, 9);
+  // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
 
   motor_timer = new Metro(1000);
   free_memory_timer = new Metro(1000);
   message = new Message_t;
-
-  queen = new Comm(2, 3);
-  sm = StateMachine::get_instance();
-  message->type = MT_INITIALIZE;
-  strcpy(message->payload, "TheFirstSwarm,9182,c,5.6");
-  delegate_message(message);
 }
 
 void loop()
 {
+  tracker->loop();
   if (motor_timer->check())
   {
     // motor->set(255, (MotorDirection)!motor->direction);
@@ -60,7 +55,7 @@ void loop()
 void send_heartbeat(void)
 {
   message->type = MT_HEARTBEAT;
-  sprintf(message->payload, "%d,%d", sm->get_state(), freeMemory());
+  sprintf(message->payload, "%d,%d", StateMachine::state(), freeMemory());
   queen->send(message);
   debug->log("Sent heartbeat");
 }
@@ -85,9 +80,9 @@ void delegate_message(Message_t *message)
   {
     case MT_INITIALIZE:
       debug->log("Initialize Received (%s)", message->payload);
-      sprintf(formatter, "%%[^%c]%c%%d%c%%c%c%%[^%c]", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
+      sprintf(formatter, "%%[^%c]%c%%d%c%%[^%c]%c%%c", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
       debug->log("Formatter: %s", formatter);
-      num_matched = sscanf(message->payload, formatter, str1, &int1, &char1, &str2);
+      num_matched = sscanf(message->payload, formatter, str1, &int1, str2, &char1);
       float1 = atof(str2);
       debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
       send_heartbeat();

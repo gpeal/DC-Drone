@@ -1,9 +1,8 @@
 #ifndef STATEMACHINE_H
 #define STATEMACHINE_H
 
-class StateMachine
+namespace StateMachine
 {
-public:
   typedef enum  {
     IDLE = 0,
     DEPLOYING,
@@ -15,14 +14,9 @@ public:
     DELIVERING,
     DISCONNECTED
   } state_t;
-
-  StateMachine(void);
   void enter(state_t state);
-  state_t get_state(void);
-  static StateMachine *get_instance(void);
-private:
-  state_t state;
+  state_t state(void);
+  extern state_t _state;
 };
-static StateMachine *sm_instance;
 
 #endif

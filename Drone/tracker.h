@@ -20,11 +20,14 @@
 #define SERVO_MIN_SPEED 0.5
 #define SERVO_MAX_SPEED 1.0
 
+#define SERVO_SEARCHING_SPEED 1
+#define SERVO_TRACKING_SPEED 0.5
+
 class Tracker
 {
   public:
     Tracker();
-    Tracker(int _mode, int _edge_mode, int _laser_pin, int _transistor_pin);
+    Tracker(int _mode, int _edge_mode, int _laser_pin, int _transistor_pin, int _servo_pin);
     void loop(void);
   private:
     typedef struct
@@ -37,16 +40,18 @@ class Tracker
       int servo_direction;
       // the threshold delta voltage in which the tracker will determine whether or not it is hitting a reflective object
       int last_reading;
+      int last_delta;
       int last_found_pos;
-    }Sensor;
+    } Sensor;
 
     // does one sweep of the servo to determine what the reading threshold should be
     void calibrate(void);
     void execute(void);
-    int make_reading(Sensor *sensor);
+    void make_reading(Sensor *sensor);
     void move_servo(Sensor *sensor, int direction);
     void move_servo(Sensor *sensor, int direction, float amount);
     void reverse_servo(Sensor *sensor);
+    int hit_prey(Sensor *sensor);
 
     // determines whether there is one laser tracking one edge or two lasers tracking both
     const int edge_mode;
@@ -56,7 +61,8 @@ class Tracker
     const int laser_pin;
     const int transistor_pin;
 
-    int reading_threshold;
+    int delta_threshold;
+    int last_delta;
     Metro *execute_timer;
     Sensor *left_sensor;
     Sensor *right_sensor;
