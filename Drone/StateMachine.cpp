@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "StateMachine.h"
 
-StateMachine::state_t StateMachine::_state = IDLE;
+StateMachine::state_t StateMachine::_state = SEARCHING;
 /**
  * StateMachine::enter takes a state_t and set the state to that
  * right now all it does is set the state and nothing else.

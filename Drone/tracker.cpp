@@ -38,7 +38,7 @@ void Tracker::calibrate(void)
     {
         make_reading(left_sensor);
         delta = left_sensor->last_delta;
-        debug->log("Delta: %d %d", delta, delta > 0);
+        // debug->log("Delta: %d %d", delta);
         if (delta < min_deltas[0] && delta > 0)
           min_deltas[0] = delta;
         else if (delta < min_deltas[1] && delta > 0)
