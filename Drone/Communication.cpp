@@ -16,8 +16,10 @@ Comm::Comm(int rx, int tx)
   comm = new SoftwareSerial(rx, tx);
   input_buffer[0] = '\0';
   comm->begin(9600);
-  // xbee = XBee();
-  // xbee.begin(*comm);
+  xbee = XBee();
+  xbee.begin(*comm);
+  xbee_response = Rx16Response();
+  xbee_request = Tx16Request();
 }
 
 /**
@@ -32,30 +34,29 @@ Message_t *Comm::loop(void)
   char input_char;
   Message_t *message;
 
-  if (comm->available())
+  xbee.readPacket();
+  if (xbee.getResponse().isAvailable() && xbee.getResponse().getApiId() == RX_16_RESPONSE)
   {
-    input_char = comm->read();
-    debug->log("Rcv: %c", input_char);
-    // input_buffer[input_buffer_index++] = input_char;
-    strncat(input_buffer, &input_char, 1);
-    if (input_char == END_DELIMITER)
+    xbee.getResponse().getRx16Response(xbee_response);
+    // copy the message to our own char array
+    for (int i = 0; i < xbee_response.getDataLength(); i++)
     {
-      if(input_buffer[strlen(input_buffer) - 2] == DELIMITER)
-      {
-        sprintf(input_buffer, "%s%s\n", input_buffer, DUMMY_PAYLOAD);
-      }
-      message = parse_message(input_buffer);
-      input_buffer[0] = '\0';
-      if (message->type == -1)
-      {
-        debug->logl(ERROR, "%s", message->payload);
-        delete message;
-        return NULL;
-      }
-      return message;
+      xbee_message[i] = (char)xbee_response.getData()[i];
     }
+    debug->log("Rcv: %s", xbee_message);
+    if(xbee_message[strlen(xbee_message) - 2] == DELIMITER)
+    {
+      sprintf(xbee_message, "%s%s\n", xbee_message, DUMMY_PAYLOAD);
+    }
+    message = parse_message(x);
+    if (message->type == -1)
+    {
+      debug->logl(ERROR, "%s", message->payload);
+      delete message;
+      return NULL;
+    }
+    return message;
   }
-
   return NULL;
 }
 
@@ -104,7 +105,13 @@ Message_t *Comm::parse_message(char *input)
 void Comm::send(Message_t *message)
 {
   char buffer[MAX_MESSAGE_LENGTH];
+  uint8_t payload[MAX_MESSAGE_LENGTH];
   int ret;
   sprintf(buffer, "%d%c%d%c%d%c%s%c", message->to, DELIMITER, message->from, DELIMITER, message->type, DELIMITER, message->payload, END_DELIMITER);
-  comm->print(buffer);
+  for(int i = 0; i < strlen(buffer); i++)
+  {
+    payload[i] = (uint8_t)buffer[i];
+  }
+  xbee_request = Tx16Request(QUEEN_ID, payload, sizeof(payload));
+  xbee.send(xbee_request);
 }

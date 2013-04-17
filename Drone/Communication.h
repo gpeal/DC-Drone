@@ -1,7 +1,7 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 #include "SoftwareSerial.h"
-#include <XBee.h>
+#include "XBee.h"
 
 #define XBEE_RX 9
 #define XBEE_TX 10
@@ -40,11 +40,10 @@ public:
   void send(Message_t *message);
 private:
   SoftwareSerial *comm;
-  // XBee xbee;
-  // we can only read one character at a time from the xbee so
-  // we incrementally save the results to a buffer
-  char input_buffer[MAX_MESSAGE_LENGTH];
-
+  XBee xbee;
+  Rx16Response xbee_response;
+  Tx16Request xbee_request;
+  char xbee_message[MAX_MESSAGE_LENGTH];
   Message_t *parse_message(char *input);
 };
 
