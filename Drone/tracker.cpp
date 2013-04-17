@@ -126,7 +126,7 @@ void Tracker::execute(void)
 
   if (left_sensor->last_reading != 0)
   {
-    debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
+    // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
   }
 }
 

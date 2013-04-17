@@ -16,6 +16,8 @@ Comm::Comm(int rx, int tx)
   comm = new SoftwareSerial(rx, tx);
   input_buffer[0] = '\0';
   comm->begin(9600);
+  // xbee = XBee();
+  // xbee.begin(*comm);
 }
 
 /**
@@ -33,6 +35,7 @@ Message_t *Comm::loop(void)
   if (comm->available())
   {
     input_char = comm->read();
+    debug->log("Rcv: %c", input_char);
     // input_buffer[input_buffer_index++] = input_char;
     strncat(input_buffer, &input_char, 1);
     if (input_char == END_DELIMITER)

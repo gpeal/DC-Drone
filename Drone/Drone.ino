@@ -2,10 +2,10 @@
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
-#include "Metro.h"
+#include <Metro.h>
 #include "MemoryFree.h"
 #include "Motor.h"
-#include "Servo.h"
+#include <Servo.h>
 #include "StateMachine.h"
 #include "Tracker.h"
 
@@ -19,9 +19,9 @@ Message_t *message;
 
 void setup()
 {
-  debug->log("Starting UP");
-  queen = new Comm(3, 4);
-  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5, 9);
+  debug->log("Starting UP Drone %d", DRONE_ID);
+  queen = new Comm(2, 3);
+  // tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5, 9);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
 
@@ -32,7 +32,7 @@ void setup()
 
 void loop()
 {
-  tracker->loop();
+  // tracker->loop();
   if (motor_timer->check())
   {
     // motor->set(255, (MotorDirection)!motor->direction);

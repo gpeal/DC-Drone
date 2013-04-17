@@ -4,7 +4,7 @@
 #include "Servo.h"
 
 #include "Debug.h"
-#include "Metro.h"
+#include <Metro.h>
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 1
