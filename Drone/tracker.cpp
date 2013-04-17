@@ -1,9 +1,9 @@
+#include <stdlib.h>
+#include <math.h>
 #include "Arduino.h"
 #include "Tracker.h"
 #include "Utils.h"
 #include "StateMachine.h"
-#include <stdlib.h>
-#include <math.h>
 
 Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin, int _servo_pin)
   : edge_mode(_edge_mode),

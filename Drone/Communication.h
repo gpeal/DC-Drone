@@ -1,7 +1,7 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 #include "SoftwareSerial.h"
-#include "XBee.h"
+#include <XBee.h>
 
 #define XBEE_RX 9
 #define XBEE_TX 10

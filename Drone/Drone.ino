@@ -1,11 +1,11 @@
 
+#include <Metro.h>
+#include <Servo.h>
+#include "MemoryFree.h"
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
-#include <Metro.h>
-#include "MemoryFree.h"
 #include "Motor.h"
-#include <Servo.h>
 #include "StateMachine.h"
 #include "Tracker.h"
 

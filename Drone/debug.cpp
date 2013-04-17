@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "Debug.h"
 
 Debug::Debug()

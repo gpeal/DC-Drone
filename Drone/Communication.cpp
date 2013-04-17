@@ -1,7 +1,7 @@
+#include <MemoryFree.h>
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
-#include "MemoryFree.h"
 
 Comm::Comm(int rx, int tx)
 {

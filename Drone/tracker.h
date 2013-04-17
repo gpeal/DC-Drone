@@ -1,10 +1,9 @@
 #ifndef TRACKER_H
 #define TRACKER_H
 
-#include "Servo.h"
-
-#include "Debug.h"
 #include <Metro.h>
+#include <Servo.h>
+#include "Debug.h"
 
 #define LEFT_EDGE 0
 #define RIGHT_EDGE 1
