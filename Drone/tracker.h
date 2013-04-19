@@ -32,8 +32,8 @@ class Tracker
       const int transistor_pin;
       Servo *servo;
       int state;
-      float servo_pos;
-      int servo_direction;
+      float pos;
+      int direction;
       int delta_threshold;
       // the threshold delta voltage in which the tracker will determine whether or not it is hitting a reflective object
       int last_reading;
@@ -44,7 +44,7 @@ class Tracker
     };
 
     // does one sweep of the servo to determine what the reading threshold should be
-    void calibrate(void);
+    void calibrate(Sensor *sensor);
     void execute(void);
     void make_reading(Sensor *sensor);
     void move_servo(Sensor *sensor, int direction);

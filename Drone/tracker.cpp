@@ -8,12 +8,13 @@
 Tracker::Tracker(int _laser_pin, int _transistor_pin_left, int _servo_pin_left, int _transistor_pin_right, int _servo_pin_right)
   : laser_pin(_laser_pin)
 {
-  left_sensor = new Sensor(_servo_pin_left, _transistor_pin_right, LEFT_EDGE);
-  right_sensor = new Sensor(_servo_pin_right, _transistor_pin_left, RIGHT_EDGE);
+  left_sensor = new Sensor(_servo_pin_left, _transistor_pin_left, LEFT_EDGE);
+  right_sensor = new Sensor(_servo_pin_right, _transistor_pin_right, RIGHT_EDGE);
 
   pinMode(laser_pin, OUTPUT);
   execute_timer = new Metro(50);
-  calibrate();
+  // calibrate(left_sensor);
+  // calibrate(right_sensor);
 }
 
 Tracker::Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
@@ -21,67 +22,65 @@ Tracker::Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
 {
   servo = new Servo();
   servo->attach(_servo_pin);
-  servo_pos = SERVO_MIN_POS;
-  servo->write(servo_pos);
-  servo_direction = !edge;
+  pos = SERVO_MIN_POS;
+  servo->write(pos);
+  direction = !edge;
   last_reading = 0;
   last_found_pos = (int)((SERVO_MAX_POS - SERVO_MIN_POS) / 2);
   delta_threshold = 40;
   debug->log("Initializing Tracker");
 }
 
-void Tracker::calibrate(void)
+void Tracker::calibrate(Sensor *sensor)
 {
-  int min_deltas_right[] = {999, 999, 999, 999, 999};
-  int min_deltas_left[] = {999, 999, 999, 999, 999};
-  int delta_left;
-  int delta_right;
+  int min_deltas[] = {999, 999, 999, 999, 999};
+  int delta;
 
-  while(left_sensor->servo_pos < SERVO_MAX_POS)
+  while(sensor->pos <= SERVO_MAX_POS)
   {
     if (execute_timer->check())
     {
-        make_reading(left_sensor);
-        make_reading(right_sensor);
-        delta_left = left_sensor->last_delta;
-        delta_right = right_sensor->last_delta;
+        make_reading(sensor);
+        delta = sensor->last_delta;
 
-        if (delta_left < min_deltas_left[0] && delta_left > 0)
-          min_deltas_left[0] = delta_left;
-        else if (delta_left < min_deltas_left[1] && delta_left > 0)
-          min_deltas_left[1] = delta_left;
-        else if (delta_left < min_deltas_left[2] && delta_left > 0)
-          min_deltas_left[2] = delta_left;
-        else if (delta_left < min_deltas_left[3] && delta_left > 0)
-          min_deltas_left[3] = delta_left;
-        else if (delta_left < min_deltas_left[4] && delta_left > 0)
-          min_deltas_left[4] = delta_left;
-
-        if (delta_right < min_deltas_right[0] && delta_right > 0)
-          min_deltas_right[0] = delta_right;
-        else if (delta_right < min_deltas_right[1] && delta_right > 0)
-          min_deltas_right[1] = delta_right;
-        else if (delta_right < min_deltas_right[2] && delta_right > 0)
-          min_deltas_right[2] = delta_right;
-        else if (delta_right < min_deltas_right[3] && delta_right > 0)
-          min_deltas_right[3] = delta_right;
-        else if (delta_right < min_deltas_right[4] && delta_right > 0)
-          min_deltas_right[4] = delta_right;
-        debug->log("Min Deltas: [%d, %d, %d, %d, %d] [%d, %d, %d %d, %d]", min_deltas_left[0], min_deltas_left[1], min_deltas_left[2], min_deltas_left[3], min_deltas_left[4], min_deltas_right[0], min_deltas_right[1], min_deltas_right[2], min_deltas_right[3], min_deltas_right[4]);
-        move_servo(left_sensor, SERVO_RIGHT, 3);
+        if (delta < min_deltas[0] && delta > 0)
+          min_deltas[0] = delta;
+        else if (delta < min_deltas[1] && delta > 0)
+          min_deltas[1] = delta;
+        else if (delta < min_deltas[2] && delta > 0)
+          min_deltas[2] = delta;
+        else if (delta < min_deltas[3] && delta > 0)
+          min_deltas[3] = delta;
+        else if (delta < min_deltas[4] && delta > 0)
+          min_deltas[4] = delta;
+        debug->log("Servo Pos: %d", sensor->pos);
+        debug->log("Min Deltas: [%d, %d, %d, %d, %d]", min_deltas[0], min_deltas[1], min_deltas[2], min_deltas[3], min_deltas[4]);
         move_servo(right_sensor, SERVO_RIGHT, 3);
     }
   }
-  left_sensor->delta_threshold = 4 * (min_deltas_left[0] + min_deltas_left[1] + min_deltas_left[2] + min_deltas_left[3] + min_deltas_left[4]) / 5.0;
-  right_sensor->delta_threshold = 4 * (min_deltas_right[0] + min_deltas_right[1] + min_deltas_right[2] + min_deltas_right[3] + min_deltas_right[4]) / 5.0;
-  debug->log("Delta threshold: %d\t%d", left_sensor->delta_threshold, right_sensor->delta_threshold);
+  sensor->delta_threshold = 4 * (min_deltas[0] + min_deltas[1] + min_deltas[2] + min_deltas[3] + min_deltas[4]) / 5.0;
+  debug->log("Delta threshold: %d\t%d", sensor->delta_threshold);
 }
 
 void Tracker::loop(void)
 {
   if (execute_timer->check())
   {
-    execute();
+    right_sensor->direction = left_sensor->direction;
+    right_sensor->pos = left_sensor->pos;
+
+    move_servo(left_sensor, left_sensor->direction, 1);
+    move_servo(right_sensor, left_sensor->direction, 1);
+    if (left_sensor->pos > SERVO_MAX_POS)
+    {
+      left_sensor->direction = SERVO_LEFT;
+    }
+    else if (left_sensor->pos <= SERVO_MIN_POS)
+    {
+      left_sensor->direction = SERVO_RIGHT;
+    }
+    debug->log("Pos: %d", (int)(100 * left_sensor->pos));
+    // execute();
   }
 }
 
@@ -93,16 +92,20 @@ void Tracker::move_servo(Sensor *sensor, int direction)
 
 void Tracker::move_servo(Sensor *sensor, int direction, float amount)
 {
-  if (direction == SERVO_LEFT && sensor->servo_pos > SERVO_MIN_POS)
+  int adjusted_pos;
+  if (direction == SERVO_LEFT)
   {
-    sensor->servo_pos -= amount;
+    sensor->pos -= amount;
   }
-  else if (direction == SERVO_RIGHT && sensor->servo_pos < SERVO_MAX_POS)
+  else if (direction == SERVO_RIGHT)
   {
-    sensor->servo_pos += amount;
+    sensor->pos += amount;
   }
 
-  sensor->servo->writeMicroseconds(1000.0 + (1000.0/180.0) * sensor->servo_pos);
+  // in reality, 180 is on the left and 0 is on the right which is reverse of what it
+  // logically should be so reverse it here
+  adjusted_pos = 180 - sensor->pos;
+  sensor->servo->writeMicroseconds(1000.0 + (1000.0/180.0) * adjusted_pos);
 }
 
 /**
@@ -126,19 +129,36 @@ void Tracker::execute(void)
     case StateMachine::SEARCHING:
       if (hit_prey(left_sensor))
       {
-        move_servo(left_sensor, SERVO_RIGHT, SERVO_SEARCHING_SPEED);
+        move_servo(left_sensor, SERVO_LEFT, SERVO_SEARCHING_SPEED);
         // prevent the servo from getting stuck on the right side
-        if (left_sensor->servo_pos > SERVO_MAX_POS)
+        if (left_sensor->pos <= SERVO_MIN_POS)
         {
-          move_servo(left_sensor, SERVO_LEFT, 45);
+          move_servo(left_sensor, SERVO_RIGHT, 30);
         }
       }
       else if (!hit_prey(left_sensor))
       {
-        move_servo(left_sensor, SERVO_LEFT, SERVO_SEARCHING_SPEED);
-        if (left_sensor->servo_pos < SERVO_MIN_POS)
+        move_servo(left_sensor, SERVO_RIGHT, SERVO_SEARCHING_SPEED);
+        if (left_sensor->pos >= SERVO_MAX_POS)
         {
-          move_servo(left_sensor, SERVO_RIGHT, 45);
+          move_servo(left_sensor, SERVO_LEFT, SERVO_MIN_POS - left_sensor->pos);
+        }
+      }
+      if (hit_prey(right_sensor))
+      {
+        move_servo(right_sensor, SERVO_LEFT, SERVO_SEARCHING_SPEED);
+        // prevent the servo from getting stuck on the left side
+        if (right_sensor->pos <= SERVO_MIN_POS)
+        {
+          move_servo(right_sensor, SERVO_RIGHT, SERVO_MAX_POS - left_sensor->pos);
+        }
+      }
+      else if (!hit_prey(right_sensor))
+      {
+        move_servo(right_sensor, SERVO_RIGHT, SERVO_SEARCHING_SPEED);
+        if (right_sensor->pos >= SERVO_MAX_POS)
+        {
+          move_servo(right_sensor, SERVO_LEFT, 30);
         }
       }
       break;
@@ -150,13 +170,13 @@ void Tracker::execute(void)
 
 void Tracker::reverse_servo(Sensor *sensor)
 {
-  if (sensor->servo_direction == SERVO_RIGHT)
+  if (sensor->direction == SERVO_RIGHT)
   {
-    sensor->servo_direction = SERVO_LEFT;
+    sensor->direction = SERVO_LEFT;
   }
-  else if (sensor->servo_direction == SERVO_LEFT)
+  else if (sensor->direction == SERVO_LEFT)
   {
-    sensor->servo_direction = SERVO_RIGHT;
+    sensor->direction = SERVO_RIGHT;
   }
 }
 
