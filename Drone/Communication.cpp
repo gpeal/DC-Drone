@@ -14,7 +14,6 @@ Comm::Comm(int rx, int tx)
     debug->log("Initializing Serial Rx: %d, Tx: %d", rx, tx);
   }
   comm = new SoftwareSerial(rx, tx);
-  input_buffer[0] = '\0';
   comm->begin(9600);
   xbee = XBee();
   xbee.begin(*comm);
@@ -43,12 +42,15 @@ Message_t *Comm::loop(void)
     {
       xbee_message[i] = (char)xbee_response.getData()[i];
     }
-    debug->log("Rcv: %s", xbee_message);
+    debug->log("Rcv (%X): %s", xbee_response.getRemoteAddress16(), xbee_message);
+    // if the payload is empty, fill it with a dummy payload.
+    // this is only necessary to help with the sscanf string parsing
+    // which breaks on empty payloads otherwise
     if(xbee_message[strlen(xbee_message) - 2] == DELIMITER)
     {
       sprintf(xbee_message, "%s%s\n", xbee_message, DUMMY_PAYLOAD);
     }
-    message = parse_message(x);
+    message = parse_message(xbee_message);
     if (message->type == -1)
     {
       debug->logl(ERROR, "%s", message->payload);
@@ -79,6 +81,8 @@ Message_t *Comm::parse_message(char *input)
   int num_matched;
   sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
+  // if the payload is DUMMY_PAYLOAD it was just added to make the string parsing easier
+  // remove it now so it doesn't actually get seen by the user
   if (strcmp(message->payload, DUMMY_PAYLOAD) == 0)
   {
     strcpy(message->payload, "");

@@ -23,7 +23,7 @@ Tracker::Tracker(int _edge_mode, int _edge, int _laser_pin, int _transistor_pin,
   debug->log("Attaching servo to port 9");
 
   pinMode(laser_pin, OUTPUT);
-  execute_timer = new Metro(15);
+  execute_timer = new Metro(50);
   calibrate();
 }
 
@@ -124,10 +124,8 @@ void Tracker::execute(void)
       break;
   }
 
-  if (left_sensor->last_reading != 0)
-  {
-    // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
-  }
+  debug->log("Last Reading: %d", (int)(100.0 * (float)left_sensor->last_reading));
+  // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
 }
 
 void Tracker::reverse_servo(Sensor *sensor)

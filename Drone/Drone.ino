@@ -1,7 +1,7 @@
 
 #include <Metro.h>
+#include <MemoryFree.h>
 #include <Servo.h>
-#include "MemoryFree.h"
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
@@ -20,29 +20,30 @@ Message_t *message;
 void setup()
 {
   debug->log("Starting UP Drone %d", DRONE_ID);
-  queen = new Comm(2, 3);
-  // tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 2, 5, 9);
+  // queen = new Comm(2, 3);
+  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 4, 5, 9);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
 
   motor_timer = new Metro(1000);
   free_memory_timer = new Metro(1000);
+  // TODO: is it necessary to instantiate a message_t here?
   message = new Message_t;
 }
 
 void loop()
 {
-  // tracker->loop();
+  tracker->loop();
   if (motor_timer->check())
   {
     // motor->set(255, (MotorDirection)!motor->direction);
   }
 
-  message = queen->loop();
-  if (message != NULL)
-  {
-    delegate_message(message);
-  }
+  // message = queen->loop();
+  // if (message != NULL)
+  // {
+  //   delegate_message(message);
+  // }
   if (free_memory_timer->check())
   {
     if (freeMemory() < 500)
