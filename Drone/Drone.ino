@@ -21,7 +21,7 @@ void setup()
 {
   debug->log("Starting UP Drone %d", DRONE_ID);
   // queen = new Comm(2, 3);
-  tracker = new Tracker(ONE_EDGE, LEFT_EDGE, 4, 5, 9);
+  tracker = new Tracker(4, 5, 9, 4, 10);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
 
