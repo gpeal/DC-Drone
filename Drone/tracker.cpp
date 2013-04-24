@@ -5,6 +5,8 @@
 #include "Utils.h"
 #include "StateMachine.h"
 
+// OMGZ SO MUCH HARD WORK!!!
+
 Tracker::Tracker(int _laser_pin, int _transistor_pin_left, int _servo_pin_left, int _transistor_pin_right, int _servo_pin_right)
   : laser_pin(_laser_pin)
 {
