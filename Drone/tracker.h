@@ -17,7 +17,7 @@
 #define SERVO_MAX_SPEED 1.0
 
 #define SERVO_SEARCHING_SPEED 1
-#define SERVO_TRACKING_SPEED 0.05
+#define SERVO_TRACKING_SPEED 0.5
 
 class Tracker
 {
@@ -47,6 +47,7 @@ class Tracker
     void calibrate(Sensor *sensor);
     void execute(void);
     void make_reading(Sensor *sensor);
+    void toggle_laser(void);
     void move_servo(Sensor *sensor, int direction);
     void move_servo(Sensor *sensor, int direction, float amount);
     void reverse_servo(Sensor *sensor);
