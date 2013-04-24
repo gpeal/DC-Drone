@@ -31,6 +31,8 @@ Tracker::Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
   debug->log("Initializing Tracker");
 }
 
+// LOOK I DID SOME WORK THIS WEEK!!
+
 void Tracker::calibrate(Sensor *sensor)
 {
   int min_deltas[] = {999, 999, 999, 999, 999};
