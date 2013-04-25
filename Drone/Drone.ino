@@ -6,6 +6,7 @@
 #include "Debug.h"
 #include "Drone.h"
 #include "Motor.h"
+#include "Sensor.h"
 #include "StateMachine.h"
 #include "Tracker.h"
 
@@ -16,12 +17,15 @@ Metro *free_memory_timer;
 Comm *queen;
 
 Message_t *message;
+// initialize the static int Sensor::laser_pin
+int Sensor::laser_pin = -1;
 
 void setup()
 {
   debug->log("Starting UP Drone %d", DRONE_ID);
   // queen = new Comm(2, 3);
-  tracker = new Tracker(4, 5, 9, 4, 10);
+  Sensor::set_laser_pin(4);
+  tracker = new Tracker(5, 9, 4, 10);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
 
