@@ -19,6 +19,7 @@ class Tracker
     Tracker();
     Tracker(int _transistor_pin1, int _servo_pin1, int _transistor_pin2, int _servo_pin2);
     void loop(void);
+    float prey_position(void);
   private:
     // does one sweep of the servo to determine what the reading threshold should be
     void execute(void);

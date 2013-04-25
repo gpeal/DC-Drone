@@ -24,6 +24,10 @@ void Tracker::loop(void)
   {
     execute();
   }
+  if (prey_position() != -1)
+  {
+    debug->log("Prey Pos: %d", prey_position());
+  }
 }
 
 
@@ -85,4 +89,13 @@ void Tracker::search(void)
   }
   // update tracker state
   state = ((int)left_sensor->recently_hit_prey() << 1) & ((int)right_sensor->recently_hit_prey());
+}
+
+float Tracker::prey_position(void)
+{
+  if (state == TRACKER_STATE_BOTH)
+  {
+    return (right_sensor->pos + left_sensor->pos) / 2;
+  }
+  return -1;
 }
