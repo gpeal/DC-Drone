@@ -10,6 +10,7 @@
 #define TRACKER_STATE_RIGHT_ONLY 1
 #define TRACKER_STATE_LEFT_ONLY 2
 #define TRACKER_STATE_BOTH 3
+#define PREY_POSITION_BUFFER_SIZE 5
 
 class Tracker
 {
@@ -19,7 +20,8 @@ class Tracker
     Tracker();
     Tracker(int _transistor_pin1, int _servo_pin1, int _transistor_pin2, int _servo_pin2);
     void loop(void);
-    float prey_position(void);
+    void update_prey_position(void);
+    float prey_position;
   private:
     // does one sweep of the servo to determine what the reading threshold should be
     void execute(void);
@@ -28,6 +30,8 @@ class Tracker
     Metro *execute_timer;
     Sensor *left_sensor;
     Sensor *right_sensor;
+    float prey_position_buffer[PREY_POSITION_BUFFER_SIZE];
+    int prey_position_buffer_i;
 };
 
 #endif

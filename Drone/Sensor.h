@@ -4,7 +4,7 @@
 #include <Metro.h>
 #include <Servo.h>
 
-#define RECENT_HIT_TIME_THRESHOLD 200
+#define RECENT_HIT_TIME_THRESHOLD 600
 #define CALIBRATION_SIZE 5
 #define CALIBRATION_DEFAULT 999
 
@@ -19,7 +19,7 @@
 #define SERVO_MIN_SPEED 0.5
 #define SERVO_MAX_SPEED 1.0
 
-#define SERVO_SEARCHING_SPEED 1
+#define SERVO_SEARCHING_SPEED 0.5
 #define SERVO_TRACKING_SPEED 0.5
 
 class Sensor
