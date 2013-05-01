@@ -1,0 +1,20 @@
+0-     Serial RX
+1-     Serial TX
+2-     Ultrasonic Sensor RX
+3-     Ultrasonic Sensor TX
+4-     Laser
+5-     Home Servo
+6-     Left Motor Direction
+7-     Left Motor Speed
+8-     Right Motor Direction
+9-     Right Motor Speed
+10-    Left Motor Encoder A
+11-    Left Motor Encoder B
+12-    Right Motor Encoder A
+13-    Right Motor Encoder B
+A0/14- Left Phototransistor
+A1/15- Left Servo
+A2/16- Right Phototransistor
+A3/17- Right Servo
+A4/18- Home Phototransistor
+A5/19- Door Servo

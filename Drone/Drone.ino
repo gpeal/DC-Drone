@@ -1,4 +1,4 @@
-
+#include <Encoder.h>
 #include <Metro.h>
 #include <MemoryFree.h>
 #include <Servo.h>
@@ -6,15 +6,18 @@
 #include "Debug.h"
 #include "Drone.h"
 #include "Motor.h"
+#include "Odometry.h"
 #include "Sensor.h"
 #include "StateMachine.h"
 #include "Tracker.h"
 
 Tracker *tracker;
 Metro *motor_timer;
+Metro *encoder_timer;
 Metro *free_memory_timer;
 // Motor *motor;
 Comm *queen;
+Odometry *odometry;
 
 Message_t *message;
 // initialize the static int Sensor::laser_pin
@@ -25,10 +28,12 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
   // queen = new Comm(2, 3);
   Sensor::set_laser_pin(4);
-  tracker = new Tracker(5, 9, 4, 10);
+  // tracker = new Tracker(0, 15, 1, 16);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
+  odometry = new Odometry(Encoder(10, 11), Encoder(12, 13));
 
+  encoder_timer = new Metro(100);
   motor_timer = new Metro(1000);
   free_memory_timer = new Metro(1000);
   // TODO: is it necessary to instantiate a message_t here?
@@ -37,11 +42,14 @@ void setup()
 
 void loop()
 {
-  tracker->loop();
+  long left_encoder_value, right_encoder_value;
+  // tracker->loop();
   if (motor_timer->check())
   {
     // motor->set(255, (MotorDirection)!motor->direction);
   }
+  odometry->loop();
+
 
   // message = queen->loop();
   // if (message != NULL)
