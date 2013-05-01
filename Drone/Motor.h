@@ -9,7 +9,7 @@ enum MotorDirection {CW, CCW};
 class Motor
 {
 public:
-  Motor(const int _speed_pin, const int _direction_pin1, const int _direction_pin2);
+  Motor(const int _speed_pin, const int _direction_pin);
 
   void set(const int _speed, const MotorDirection _direction);
 
@@ -18,8 +18,7 @@ public:
 
 private:
   const int speed_pin;
-  const int direction_pin1;
-  const int direction_pin2;
+  const int direction_pin;
 };
 
 #endif

@@ -15,7 +15,8 @@ Tracker *tracker;
 Metro *motor_timer;
 Metro *encoder_timer;
 Metro *free_memory_timer;
-// Motor *motor;
+Motor *left_motor;
+Motor *right_motor;
 Comm *queen;
 Odometry *odometry;
 
@@ -29,12 +30,13 @@ void setup()
   // queen = new Comm(2, 3);
   Sensor::set_laser_pin(4);
   // tracker = new Tracker(0, 15, 1, 16);
-  // motor = new Motor(5, 6, 7);
+  left_motor = new Motor(3, 12);
+  right_motor = new Motor(11, 13);
   // motor->set(255, CW);
-  odometry = new Odometry(Encoder(11, 10), Encoder(12, 13));
+  odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
 
   encoder_timer = new Metro(100);
-  motor_timer = new Metro(1000);
+  motor_timer = new Metro(5000);
   free_memory_timer = new Metro(1000);
   // TODO: is it necessary to instantiate a message_t here?
   message = new Message_t;
@@ -46,7 +48,8 @@ void loop()
   // tracker->loop();
   if (motor_timer->check())
   {
-    // motor->set(255, (MotorDirection)!motor->direction);
+    left_motor->set(500, (MotorDirection)!left_motor->direction);
+    right_motor->set(500, (MotorDirection)!left_motor->direction);
   }
   odometry->loop();
 
