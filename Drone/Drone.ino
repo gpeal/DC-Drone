@@ -31,7 +31,7 @@ void setup()
   // tracker = new Tracker(0, 15, 1, 16);
   // motor = new Motor(5, 6, 7);
   // motor->set(255, CW);
-  odometry = new Odometry(Encoder(10, 11), Encoder(12, 13));
+  odometry = new Odometry(Encoder(11, 10), Encoder(12, 13));
 
   encoder_timer = new Metro(100);
   motor_timer = new Metro(1000);
