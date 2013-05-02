@@ -19,7 +19,7 @@ public:
   void add_waypoint(Coordinate waypoint);
 private:
   float heading_to_target(void);
-  float distance_from_target(void);
+  double distance_from_target(void);
   Motor *left_motor;
   Motor *right_motor;
   Odometry *odometry;
