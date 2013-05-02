@@ -18,7 +18,7 @@ class Tracker
     int state;
 
     Tracker();
-    Tracker(int _transistor_pin1, int _servo_pin1, int _transistor_pin2, int _servo_pin2);
+    Tracker(int _transistor_pin_left, int _servo_pin_left, int _transistor_pin_right, int _servo_pin_right);
     void loop(void);
     void update_prey_position(void);
     float prey_position;

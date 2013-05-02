@@ -42,13 +42,13 @@ void Odometry::loop(void)
     distance += d_distance;
 
 
-    Serial.print(left_reading);
-    Serial.print("\t");
-    Serial.print(right_reading);
-    Serial.print("\t");
-    Serial.print(distance);
-    Serial.print("\t");
-    Serial.println(heading * 180 / PI);
+    // Serial.print(left_reading);
+    // Serial.print("\t");
+    // Serial.print(right_reading);
+    // Serial.print("\t");
+    // Serial.print(distance);
+    // Serial.print("\t");
+    // Serial.println(heading * 180 / PI);
     // Serial.print("\t");
     // Serial.println(heading);
     // Serial.print("\t");

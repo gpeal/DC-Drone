@@ -32,7 +32,7 @@ void Tracker::loop(void)
   }
   if (state == TRACKER_STATE_BOTH)
   {
-    debug->log("Prey Pos: %d", (int)prey_position);
+    // debug->log("Prey Pos: %d", (int)prey_position);
     // int left_ratio = (int)(100.0 * ((float)left_sensor->last_delta / (float)left_sensor->delta_threshold));
     // int right_ratio = (int)(100.0 * ((float)right_sensor->last_delta / (float)right_sensor->delta_threshold));
     // if (left_ratio >= 100 || right_ratio >= 100)
@@ -55,7 +55,7 @@ void Tracker::execute(void)
   {
     case StateMachine::SEARCHING:
       search();
-      //debug->log("Last Reading: %d\t%d", (int)left_sensor->last_reading, (int)right_sensor->last_reading);
+      debug->log("Last Reading: %d\t%d", (int)left_sensor->last_reading, (int)right_sensor->last_reading);
       break;
   }
 

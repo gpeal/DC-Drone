@@ -25,47 +25,47 @@ Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
  */
 void Sensor::calibrate()
 {
-  // int deltas[CALIBRATION_SIZE];
-  // int delta;
-  // int number_of_valid_readings = 0;
-  // int sum_of_valid_readings = 0;
-  // Metro calibration_timer(15);
+  int deltas[CALIBRATION_SIZE];
+  int delta;
+  int number_of_valid_readings = 0;
+  int sum_of_valid_readings = 0;
+  Metro calibration_timer(15);
 
-  // for (int i = 0; i < CALIBRATION_SIZE; i++)
-  // {
-  //   deltas[i] = CALIBRATION_DEFAULT;
-  // }
+  for (int i = 0; i < CALIBRATION_SIZE; i++)
+  {
+    deltas[i] = CALIBRATION_DEFAULT;
+  }
 
-  // while(pos <= SERVO_MAX_POS)
-  // {
-  //   if (calibration_timer.check())
-  //   {
-  //       make_reading();
-  //       Sensor::toggle_laser();
-  //       for (int i = 0; i < CALIBRATION_SIZE; i++)
-  //       {
-  //         if (last_delta < deltas[i] && last_delta >= 1)
-  //         {
-  //           deltas[i] = last_delta;
-  //           break;
-  //         }
-  //       }
-  //       debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
-  //       debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
-  //       move_servo(SERVO_RIGHT, 3);
-  //   }
-  // }
-  // // find the average valid reading
-  // for (int i = 0; i < CALIBRATION_SIZE; i++)
-  // {
-  //   if (deltas[i] != CALIBRATION_DEFAULT)
-  //   {
-  //     number_of_valid_readings++;
-  //     sum_of_valid_readings += deltas[i];
-  //   }
-  // }
-  // delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
-  delta_threshold = 4;
+  while(pos <= SERVO_MAX_POS)
+  {
+    if (calibration_timer.check())
+    {
+        make_reading();
+        Sensor::toggle_laser();
+        for (int i = 0; i < CALIBRATION_SIZE; i++)
+        {
+          if (last_delta < deltas[i] && last_delta >= 1)
+          {
+            deltas[i] = last_delta;
+            break;
+          }
+        }
+        debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
+        debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
+        move_servo(SERVO_RIGHT, 3);
+    }
+  }
+  // find the average valid reading
+  for (int i = 0; i < CALIBRATION_SIZE; i++)
+  {
+    if (deltas[i] != CALIBRATION_DEFAULT)
+    {
+      number_of_valid_readings++;
+      sum_of_valid_readings += deltas[i];
+    }
+  }
+  delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
+  // delta_threshold = 4;
   debug->log("Delta threshold: %d", delta_threshold);
 }
 

@@ -42,11 +42,10 @@ void setup()
 {
   debug->log("Starting UP Drone %d", DRONE_ID);
   // queen = new Comm(2, 3);
-  Sensor::set_laser_pin(4);
-  // tracker = new Tracker(0, 15, 1, 16);
+  Sensor::set_laser_pin(2);
+  tracker = new Tracker(0, 15, 2, 17);
   left_motor = new Motor(12, 3);
   right_motor = new Motor(13, 11);
-  // motor->set(255, CW);
   odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
   gps = new GPS(left_motor, right_motor, odometry);
   add_test_routine();
@@ -61,7 +60,7 @@ void setup()
 void loop()
 {
   long left_encoder_value, right_encoder_value;
-  // tracker->loop();
+  tracker->loop();
   odometry->loop();
   gps->loop();
 
