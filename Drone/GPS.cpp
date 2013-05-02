@@ -1,7 +1,7 @@
 #include "Debug.h"
-#include "MotorDriver.h"
+#include "GPS.h"
 
-MotorDriver::MotorDriver(Motor *left_motor, Motor *right_motor, Odometry *odometry)
+GPS::GPS(Motor *left_motor, Motor *right_motor, Odometry *odometry)
   :left_motor(left_motor),
    right_motor(right_motor),
    odometry(odometry)
@@ -9,9 +9,9 @@ MotorDriver::MotorDriver(Motor *left_motor, Motor *right_motor, Odometry *odomet
   timer = new Metro(20);
 }
 
-void MotorDriver::loop(void)
+void GPS::loop(void)
 {
-  if (!timer->check())
+  if (targets.isEmpty() || !timer->check())
     return;
   debug->log("%d,%d->%d,%d", (int)odometry->position.x, (int)odometry->position.y, (int)target.x, (int)target.y);
   // the angle in which the robot stop and just turns towards the target
@@ -62,16 +62,13 @@ void MotorDriver::loop(void)
       debug->log("straight");
     }
   }
-
+  if (reached_target())
+  {
+    targets.pop();
+  }
 }
 
-void MotorDriver::move_to(float x, float y)
-{
-  target.x = x;
-  target.y = y;
-}
-
-float MotorDriver::heading_to_target(void)
+float GPS::heading_to_target(void)
 {
   Coordinate diff;
   float heading;
@@ -86,4 +83,19 @@ float MotorDriver::heading_to_target(void)
   else if (diff.y < 0 && diff.x < 0)
     heading += 180;
   return heading;
+}
+
+float GPS::distance_from_target(void)
+{
+  return sqrt(pow(target.x - odometry->position.x, 2) + pow(target.y - odometry->position.y, 2));
+}
+
+bool GPS::reached_target(void)
+{
+  return distance_from_target() < 3.0;
+}
+
+void GPS::add_waypoint(Coordinate waypoint)
+{
+  targets.push(waypoint);
 }

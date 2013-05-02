@@ -2,9 +2,11 @@
 #include <Metro.h>
 #include <MemoryFree.h>
 #include <Servo.h>
+#include <QueueList.h>
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
+#include "GPS.h"
 #include "Motor.h"
 #include "Odometry.h"
 #include "Sensor.h"
@@ -12,17 +14,30 @@
 #include "Tracker.h"
 
 Tracker *tracker;
-Metro *motor_timer;
-Metro *encoder_timer;
 Metro *free_memory_timer;
 Motor *left_motor;
 Motor *right_motor;
 Comm *queen;
 Odometry *odometry;
+GPS *gps;
+  QueueList <int> targets2;
+
 
 Message_t *message;
 // initialize the static int Sensor::laser_pin
 int Sensor::laser_pin = -1;
+
+// temp function
+void add_test_routine()
+{
+  Coordinate waypoint;
+  waypoint.x = 0;
+  waypoint.y = 24;
+  gps->add_waypoint(waypoint);
+  waypoint.x = 24;
+  waypoint.y = 24;
+  gps->add_waypoint(waypoint);
+}
 
 void setup()
 {
@@ -34,24 +49,22 @@ void setup()
   right_motor = new Motor(11, 13);
   // motor->set(255, CW);
   odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
+  gps = new GPS(left_motor, right_motor, odometry);
+  add_test_routine();
 
-  encoder_timer = new Metro(100);
-  motor_timer = new Metro(5000);
   free_memory_timer = new Metro(1000);
   // TODO: is it necessary to instantiate a message_t here?
   message = new Message_t;
+  // output battery level
+  debug->log("Battery Voltage: %d", (int)readVcc());
 }
 
 void loop()
 {
   long left_encoder_value, right_encoder_value;
   // tracker->loop();
-  if (motor_timer->check())
-  {
-    left_motor->set(500, (MotorDirection)!left_motor->direction);
-    right_motor->set(500, (MotorDirection)!left_motor->direction);
-  }
   odometry->loop();
+  gps->loop();
 
 
   // message = queen->loop();

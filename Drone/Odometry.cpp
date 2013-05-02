@@ -18,12 +18,12 @@ void Odometry::loop(void)
     heading = (float)(left_reading - right_reading) / 2.0;
     position.x = distance * sin(heading * 3.14 / 180);
     position.y = distance * cos(heading * 3.14 / 180);
-    Serial.print(distance);
-    Serial.print("\t");
-    Serial.print(heading);
-    Serial.print("\t");
-    Serial.print(position.x);
-    Serial.print(",");
-    Serial.println(position.y);
+    // Serial.print(distance);
+    // Serial.print("\t");
+    // Serial.print(heading);
+    // Serial.print("\t");
+    // Serial.print(left_reading);
+    // Serial.print(",");
+    // Serial.println(right_reading);
   }
 }
