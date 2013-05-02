@@ -8,6 +8,7 @@ Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
   servo = new Servo();
   servo->attach(_servo_pin);
   pos = SERVO_MIN_POS;
+  pos_ra = new RunningAverage(50);
   servo->write(pos);
   direction = !edge;
   last_reading = 0;
@@ -25,47 +26,47 @@ Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
  */
 void Sensor::calibrate()
 {
-  int deltas[CALIBRATION_SIZE];
-  int delta;
-  int number_of_valid_readings = 0;
-  int sum_of_valid_readings = 0;
-  Metro calibration_timer(15);
+  // int deltas[CALIBRATION_SIZE];
+  // int delta;
+  // int number_of_valid_readings = 0;
+  // int sum_of_valid_readings = 0;
+  // Metro calibration_timer(15);
 
-  for (int i = 0; i < CALIBRATION_SIZE; i++)
-  {
-    deltas[i] = CALIBRATION_DEFAULT;
-  }
+  // for (int i = 0; i < CALIBRATION_SIZE; i++)
+  // {
+  //   deltas[i] = CALIBRATION_DEFAULT;
+  // }
 
-  while(pos <= SERVO_MAX_POS)
-  {
-    if (calibration_timer.check())
-    {
-        make_reading();
-        Sensor::toggle_laser();
-        for (int i = 0; i < CALIBRATION_SIZE; i++)
-        {
-          if (last_delta < deltas[i] && last_delta >= 1)
-          {
-            deltas[i] = last_delta;
-            break;
-          }
-        }
-        debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
-        debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
-        move_servo(SERVO_RIGHT, 3);
-    }
-  }
-  // find the average valid reading
-  for (int i = 0; i < CALIBRATION_SIZE; i++)
-  {
-    if (deltas[i] != CALIBRATION_DEFAULT)
-    {
-      number_of_valid_readings++;
-      sum_of_valid_readings += deltas[i];
-    }
-  }
-  delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
-  // delta_threshold = 4;
+  // while(pos <= SERVO_MAX_POS)
+  // {
+  //   if (calibration_timer.check())
+  //   {
+  //       make_reading();
+  //       Sensor::toggle_laser();
+  //       for (int i = 0; i < CALIBRATION_SIZE; i++)
+  //       {
+  //         if (last_delta < deltas[i] && last_delta >= 1)
+  //         {
+  //           deltas[i] = last_delta;
+  //           break;
+  //         }
+  //       }
+  //       debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
+  //       debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
+  //       move_servo(SERVO_RIGHT, 3);
+  //   }
+  // }
+  // // find the average valid reading
+  // for (int i = 0; i < CALIBRATION_SIZE; i++)
+  // {
+  //   if (deltas[i] != CALIBRATION_DEFAULT)
+  //   {
+  //     number_of_valid_readings++;
+  //     sum_of_valid_readings += deltas[i];
+  //   }
+  // }
+  // delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
+  delta_threshold = 4;
   debug->log("Delta threshold: %d", delta_threshold);
 }
 
@@ -85,6 +86,13 @@ void Sensor::make_reading(void)
   {
     last_delta *= -1;
   }
+
+  if (hit_prey())
+  {
+    last_found_pos = pos;
+    last_found_millis = millis();
+  }
+  pos_ra->addValue(pos);
 }
 
 void Sensor::move_servo(int direction, float amount)
@@ -123,7 +131,7 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  return millis() - last_found_millis < RECENT_HIT_TIME_THRESHOLD;
+  return abs(pos - pos_ra->getAverage()) < RECENT_HIT_POS_THRESHOLD;
 }
 
 void Sensor::set_laser_pin(int pin)

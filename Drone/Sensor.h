@@ -3,8 +3,9 @@
 
 #include <Metro.h>
 #include <Servo.h>
+#include "RunningAverage.h"
 
-#define RECENT_HIT_TIME_THRESHOLD 600
+#define RECENT_HIT_POS_THRESHOLD 4
 #define CALIBRATION_SIZE 5
 #define CALIBRATION_DEFAULT 999
 
@@ -30,6 +31,7 @@ public:
   Servo *servo;
   int state;
   float pos;
+  RunningAverage *pos_ra;
   int direction;
   int delta_threshold;
   // the threshold delta voltage in which the tracker will determine whether or not it is hitting a reflective object

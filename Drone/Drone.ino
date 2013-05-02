@@ -43,11 +43,12 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
   // queen = new Comm(2, 3);
   Sensor::set_laser_pin(2);
-  tracker = new Tracker(0, 15, 2, 17);
-  left_motor = new Motor(12, 3);
-  right_motor = new Motor(13, 11);
-  odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
-  gps = new GPS(left_motor, right_motor, odometry);
+  tracker = new Tracker(0, 15, 4, 19);
+  // tracker = new Tracker(5, 9, 4, 10);
+  // left_motor = new Motor(12, 3);
+  // right_motor = new Motor(13, 11);
+  // odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
+  // gps = new GPS(left_motor, right_motor, odometry);
   add_test_routine();
 
   free_memory_timer = new Metro(1000);
@@ -61,8 +62,13 @@ void loop()
 {
   long left_encoder_value, right_encoder_value;
   tracker->loop();
-  odometry->loop();
-  gps->loop();
+  // odometry->loop();
+  // gps->loop();
+
+  if (StateMachine::state() == StateMachine::ATTACKING)
+  {
+      attack();
+  }
 
 
   // message = queen->loop();
@@ -70,6 +76,11 @@ void loop()
   // {
   //   delegate_message(message);
   // }
+  free_memory_check();
+}
+
+void free_memory_check(void)
+{
   if (free_memory_timer->check())
   {
     if (freeMemory() < 500)
@@ -120,4 +131,22 @@ void delegate_message(Message_t *message)
       break;
   }
   delete message;
+}
+
+void attack(void)
+{
+  float speed_scale = 0.5;
+  int heading_to_prey = tracker->prey_position - 90;
+  // the amount to slow one tread by to make the drone turn towards the prey
+  float offset = 1.0f - (0.5f * heading_to_prey / 90.0f);
+  if (heading_to_prey < 0)
+  {
+    left_motor->set(255 * speed_scale * offset, CCW);
+    right_motor->set(255 * speed_scale, CCW);
+  }
+  else if (heading_to_prey > 0)
+  {
+    left_motor->set(255 * speed_scale, CCW);
+    right_motor->set(255 * speed_scale * offset, CCW);
+  }
 }

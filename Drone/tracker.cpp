@@ -55,11 +55,11 @@ void Tracker::execute(void)
   {
     case StateMachine::SEARCHING:
       search();
-      debug->log("Last Reading: %d\t%d", (int)left_sensor->last_reading, (int)right_sensor->last_reading);
+      // debug->log("Last Reading: %d\t%d", (int)left_sensor->last_reading(), (int)right_sensor->last_reading());
       break;
   }
 
-  // debug->log("Last Reading: %d", (int)(left_sensor->last_reading));
+  // debug->log("Last Reading: %d", (int)(left_sensor->last_reading()));
   // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
 }
 
@@ -73,8 +73,6 @@ void Tracker::search(void)
   //left sensor
   if (left_sensor->hit_prey())
   {
-    left_sensor->last_found_millis = millis();
-    left_sensor->last_found_pos = left_sensor->pos;
     if (left_sensor->pos > SERVO_MIN_POS)
     {
       left_sensor->move_servo(SERVO_LEFT, SERVO_TRACKING_SPEED);
@@ -91,8 +89,6 @@ void Tracker::search(void)
   // right sensor
   if (right_sensor->hit_prey())
   {
-    right_sensor->last_found_millis = millis();
-    right_sensor->last_found_pos = right_sensor->pos;
     if (right_sensor->pos < SERVO_MAX_POS)
     {
       right_sensor->move_servo(SERVO_RIGHT, SERVO_TRACKING_SPEED);
@@ -108,6 +104,17 @@ void Tracker::search(void)
   }
   // update tracker state
   state = ((int)left_sensor->recently_hit_prey() << 1) | ((int)right_sensor->recently_hit_prey());
+  // for now, this is where we will switch between searching and attacking
+  if (state == TRACKER_STATE_BOTH)
+  {
+    StateMachine::enter(StateMachine::ATTACKING);
+    debug->log("ATTACKING %d\t%d", (int)left_sensor->pos, (int)left_sensor->pos_ra->getAverage());
+  }
+  else
+  {
+    StateMachine::enter(StateMachine::SEARCHING);
+    debug->log("SEARCHING");
+  }
   update_prey_position();
 }
 
