@@ -1,3 +1,4 @@
+#include "Debug.h"
 #include "MotorDriver.h"
 
 MotorDriver::MotorDriver(Motor *left_motor, Motor *right_motor, Odometry *odometry)
@@ -12,6 +13,7 @@ void MotorDriver::loop(void)
 {
   if (!timer->check())
     return;
+  debug->log("%d,%d->%d,%d", (int)odometry->position.x, (int)odometry->position.y, (int)target.x, (int)target.y);
   // the angle in which the robot stop and just turns towards the target
   float threshold = 30;
   float _heading_to_target;
@@ -27,31 +29,37 @@ void MotorDriver::loop(void)
     {
       left_motor->set(255.0 * SPEED, CW);
       right_motor->set(255.0 * SPEED, CCW);
+      debug->log("left");
     }
     else if (_heading_to_target > 0)
     {
       left_motor->set(255.0 * SPEED, CCW);
       right_motor->set(255.0 * SPEED, CW);
+      debug->log("right");
     }
   }
   // the robot is facing in the right vicinity
   // move forward with slight alterations
   else
   {
+    offset = 1 - 0.5 * _heading_to_target / threshold;
     if (_heading_to_target < 0)
     {
-      left_motor->set(255 * SPEED * (0.1 - 0.5 * _heading_to_target / threshold), CW);
+      left_motor->set(255 * SPEED * offset, CW);
       right_motor->set(255 * SPEED, CW);
+      debug->log("sleft %d", (int)(offset * 100));
     }
     else if (_heading_to_target > 0)
     {
       left_motor->set(255 * SPEED, CW);
-      right_motor->set(255 * SPEED * (0.1 - 0.5 * _heading_to_target / threshold), CW);
+      right_motor->set(255 * SPEED * offset, CW);
+      debug->log("sright %d", (int)(offset * 100));
     }
     else
     {
       left_motor->set(255 * SPEED, CW);
       right_motor->set(255 * SPEED, CW);
+      debug->log("straight");
     }
   }
 
