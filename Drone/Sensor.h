@@ -15,8 +15,8 @@
 #define SERVO_LEFT 0
 #define SERVO_RIGHT 1
 
-#define SERVO_MIN_POS 15
-#define SERVO_MAX_POS 165
+#define SERVO_MIN_POS 0
+#define SERVO_MAX_POS 180
 #define SERVO_MIN_SPEED 0.5
 #define SERVO_MAX_SPEED 1.0
 

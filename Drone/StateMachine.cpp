@@ -9,9 +9,9 @@ StateMachine::state_t StateMachine::_state = SEARCHING;
  *
  * @param state the state to enter
  */
-void StateMachine::enter(state_t state_)
+void StateMachine::enter(state_t new_state)
 {
-  // state = state_;
+  _state = new_state;
 }
 
 StateMachine::state_t StateMachine::state(void)

@@ -45,8 +45,8 @@ void setup()
   Sensor::set_laser_pin(2);
   tracker = new Tracker(0, 15, 4, 19);
   // tracker = new Tracker(5, 9, 4, 10);
-  // left_motor = new Motor(12, 3);
-  // right_motor = new Motor(13, 11);
+  left_motor = new Motor(11, 13);
+  right_motor = new Motor(3, 12);
   // odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
   // gps = new GPS(left_motor, right_motor, odometry);
   add_test_routine();
@@ -64,10 +64,14 @@ void loop()
   tracker->loop();
   // odometry->loop();
   // gps->loop();
-
-  if (StateMachine::state() == StateMachine::ATTACKING)
+  switch(StateMachine::state())
   {
+    case StateMachine::SEARCHING:
+      search();
+      break;
+    case StateMachine::ATTACKING:
       attack();
+      break;
   }
 
 
@@ -133,20 +137,28 @@ void delegate_message(Message_t *message)
   delete message;
 }
 
+void search(void)
+{
+  debug->log("track");
+  left_motor->set(0, CCW);
+  right_motor->set(0, CCW);
+}
+
 void attack(void)
 {
-  float speed_scale = 0.5;
+  float speed_scale = 1.0;
   int heading_to_prey = tracker->prey_position - 90;
   // the amount to slow one tread by to make the drone turn towards the prey
-  float offset = 1.0f - (0.5f * heading_to_prey / 90.0f);
+  float offset = 1.0f - (1.0f * (float)abs(heading_to_prey) / 90.0f);
+  debug->log("Heading to prey: %d %d", (int)heading_to_prey, (int)(100 * offset));
   if (heading_to_prey < 0)
   {
-    left_motor->set(255 * speed_scale * offset, CCW);
-    right_motor->set(255 * speed_scale, CCW);
+    left_motor->set(255.0 * speed_scale * offset, CCW);
+    right_motor->set(255.0 * speed_scale, CCW);
   }
   else if (heading_to_prey > 0)
   {
-    left_motor->set(255 * speed_scale, CCW);
-    right_motor->set(255 * speed_scale * offset, CCW);
+    left_motor->set(255.0 * speed_scale, CCW);
+    right_motor->set(255.0 * speed_scale * offset, CCW);
   }
 }

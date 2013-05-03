@@ -6,6 +6,7 @@
 
 void delegate_message(Message_t *message);
 void free_memory_check(void);
+void search(void);
 void attack(void);
 
 #endif

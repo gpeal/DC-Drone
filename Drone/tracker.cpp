@@ -54,6 +54,7 @@ void Tracker::execute(void)
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
+    case StateMachine::ATTACKING:
       search();
       // debug->log("Last Reading: %d\t%d", (int)left_sensor->last_reading(), (int)right_sensor->last_reading());
       break;
@@ -108,12 +109,10 @@ void Tracker::search(void)
   if (state == TRACKER_STATE_BOTH)
   {
     StateMachine::enter(StateMachine::ATTACKING);
-    debug->log("ATTACKING %d\t%d", (int)left_sensor->pos, (int)left_sensor->pos_ra->getAverage());
   }
   else
   {
     StateMachine::enter(StateMachine::SEARCHING);
-    debug->log("SEARCHING");
   }
   update_prey_position();
 }

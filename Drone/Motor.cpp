@@ -1,9 +1,9 @@
 #include "Arduino.h"
 #include "Motor.h"
 
-Motor::Motor(const int _speed_pin, const int _direction_pin)
-  : speed_pin(_speed_pin),
-    direction_pin(_direction_pin)
+Motor::Motor(const int speed_pin, const int direction_pin)
+  : speed_pin(speed_pin),
+    direction_pin(direction_pin)
 {
   pinMode(speed_pin, OUTPUT);
   pinMode(direction_pin, OUTPUT);
