@@ -60,7 +60,7 @@ void Tracker::execute(void)
       break;
   }
 
-  // debug->log("Last Reading: %d", (int)(left_sensor->last_reading()));
+  // debug->log("LR: %d\t%d", (int)left_sensor->last_reading, (int)right_sensor->last_reading);
   // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
 }
 
@@ -84,7 +84,10 @@ void Tracker::search(void)
     left_sensor->move_servo(SERVO_RIGHT, SERVO_SEARCHING_SPEED);
     if (left_sensor->pos >= SERVO_MAX_POS)
     {
+      //serve reached end, move all of the way left
       left_sensor->move_servo(SERVO_LEFT, left_sensor->pos - SERVO_MIN_POS);
+      // clear the position average since it's invalid now
+      left_sensor->clear_pos_ra();
     }
   }
   // right sensor
@@ -101,19 +104,24 @@ void Tracker::search(void)
     if (right_sensor->pos <= SERVO_MIN_POS)
     {
       right_sensor->move_servo(SERVO_RIGHT, SERVO_MAX_POS - right_sensor->pos);
+      right_sensor->clear_pos_ra();
     }
   }
   // update tracker state
   state = ((int)left_sensor->recently_hit_prey() << 1) | ((int)right_sensor->recently_hit_prey());
   // for now, this is where we will switch between searching and attacking
-  if (state == TRACKER_STATE_BOTH)
+  // the check for the difference in position ensures that they are both tracking the same thing.
+  // the number 60 was measured empirically
+  if (state == TRACKER_STATE_BOTH && abs(left_sensor->pos - right_sensor->pos) < 60.0f)
   {
     StateMachine::enter(StateMachine::ATTACKING);
+    debug->log("D:%d", (int)left_sensor->pos - (int)right_sensor->pos);
   }
   else
   {
     StateMachine::enter(StateMachine::SEARCHING);
   }
+  // debug->log("S%d", StateMachine::state());
   update_prey_position();
 }
 

@@ -8,7 +8,7 @@ Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
   servo = new Servo();
   servo->attach(_servo_pin);
   pos = SERVO_MIN_POS;
-  pos_ra = new RunningAverage(10);
+  pos_ra = new RunningAverage(50);
   servo->write(pos);
   direction = !edge;
   last_reading = 0;
@@ -51,7 +51,7 @@ void Sensor::calibrate()
             break;
           }
         }
-        debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
+        // debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
         debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
         move_servo(SERVO_RIGHT, 3);
     }
@@ -65,7 +65,7 @@ void Sensor::calibrate()
       sum_of_valid_readings += deltas[i];
     }
   }
-  delta_threshold = 6 * sum_of_valid_readings / number_of_valid_readings;
+  delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
   debug->log("Delta threshold: %d", delta_threshold);
 }
 
@@ -149,4 +149,12 @@ void Sensor::toggle_laser(void)
   }
   int laser_value = digitalRead(laser_pin);
   digitalWrite(laser_pin, !laser_value);
+}
+
+/**
+ * Sensor::clear_pos_ra clears the position running average
+ */
+void Sensor::clear_pos_ra(void)
+{
+  pos_ra->clear();
 }

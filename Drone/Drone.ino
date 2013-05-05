@@ -13,6 +13,8 @@
 #include "StateMachine.h"
 #include "Tracker.h"
 
+#define PREY_CENTER_ANGLE 75
+
 Tracker *tracker;
 Metro *free_memory_timer;
 Motor *left_motor;
@@ -139,7 +141,6 @@ void delegate_message(Message_t *message)
 
 void search(void)
 {
-  debug->log("track");
   left_motor->set(0, CCW);
   right_motor->set(0, CCW);
 }
@@ -147,18 +148,22 @@ void search(void)
 void attack(void)
 {
   float speed_scale = 1.0;
-  int heading_to_prey = tracker->prey_position - 90;
+  int heading_to_prey = tracker->prey_position - PREY_CENTER_ANGLE;
   // the amount to slow one tread by to make the drone turn towards the prey
-  float offset = 1.0f - (1.0f * (float)abs(heading_to_prey) / 90.0f);
-  debug->log("Heading to prey: %d %d", (int)heading_to_prey, (int)(100 * offset));
+  float offset = 0.8f - (0.8f * (float)abs(heading_to_prey) / 90.0f);
+  // prey is to the right of the robot (slow down left tread)
   if (heading_to_prey < 0)
   {
     left_motor->set(255.0 * speed_scale * offset, CCW);
     right_motor->set(255.0 * speed_scale, CCW);
+    // offset the laser outwards so it is less likely to skip over the prey
+    // tracker->right_sensor->move_servo(SERVO_RIGHT, 2);
   }
+  // prey is to the left of the robot (slow down right tread)
   else if (heading_to_prey > 0)
   {
     left_motor->set(255.0 * speed_scale, CCW);
     right_motor->set(255.0 * speed_scale * offset, CCW);
+    // tracker->left_sensor->move_servo(SERVO_LEFT, 2);
   }
 }

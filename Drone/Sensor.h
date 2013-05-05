@@ -51,6 +51,7 @@ public:
   void calibrate(void);
   bool hit_prey(void);
   bool recently_hit_prey(void);
+  void clear_pos_ra(void);
   // there should only be 1 laser pin for all of the sensors
   // the laser also needs to be accessible for the sensor in its calibration routine
   static int laser_pin;

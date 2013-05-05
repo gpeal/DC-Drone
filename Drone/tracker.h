@@ -22,14 +22,14 @@ class Tracker
     void loop(void);
     void update_prey_position(void);
     float prey_position;
+    Sensor *left_sensor;
+    Sensor *right_sensor;
   private:
     // does one sweep of the servo to determine what the reading threshold should be
     void execute(void);
     void search(void);
     int last_delta;
     Metro *execute_timer;
-    Sensor *left_sensor;
-    Sensor *right_sensor;
     float prey_position_buffer[PREY_POSITION_BUFFER_SIZE];
     int prey_position_buffer_i;
 };
