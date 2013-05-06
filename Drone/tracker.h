@@ -4,13 +4,17 @@
 #include <Metro.h>
 #include <Servo.h>
 #include "Debug.h"
+#include "MotorDriver.h"
 #include "Sensor.h"
 
-#define TRACKER_STATE_NEITHER 0
-#define TRACKER_STATE_RIGHT_ONLY 1
-#define TRACKER_STATE_LEFT_ONLY 2
-#define TRACKER_STATE_BOTH 3
-#define PREY_POSITION_BUFFER_SIZE 5
+#define TRACKER_STATE_NONE 0
+#define TRACKER_STATE_RIGHT 1
+#define TRACKER_STATE_MIDDLE 2
+#define TRACKER_STATE_MIDDLE_RIGHT 3
+#define TRACKER_STATE_LEFT 4
+#define TRACKER_STATE_LEFT_RIGHT 5
+#define TRACKER_STATE_LEFT_MIDDLE 6
+#define TRACKER_STATE_LEFT_MIDDLE_RIGHT 7
 
 class Tracker
 {
@@ -18,20 +22,18 @@ class Tracker
     int state;
 
     Tracker();
-    Tracker(int _transistor_pin_left, int _servo_pin_left, int _transistor_pin_right, int _servo_pin_right);
     void loop(void);
-    void update_prey_position(void);
-    float prey_position;
+    Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right);
     Sensor *left_sensor;
     Sensor *right_sensor;
+    Sensor *middle_sensor;
   private:
     // does one sweep of the servo to determine what the reading threshold should be
     void execute(void);
     void search(void);
     int last_delta;
     Metro *execute_timer;
-    float prey_position_buffer[PREY_POSITION_BUFFER_SIZE];
-    int prey_position_buffer_i;
+    MotorDriver *motor_driver;
 };
 
 #endif

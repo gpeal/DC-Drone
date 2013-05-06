@@ -27,6 +27,10 @@ Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
 Odometry *MotorDriver::odometry;
 MotorDriver *MotorDriver::instance;
+Metro attack_timer(10);
+int attack_count = 0;
+Metro test_timer(2000);
+int test_count = 0;
 
 
 Message_t *message;
@@ -36,10 +40,12 @@ int Sensor::laser_pin = -1;
 
 void setup()
 {
-  debug->log("Starting UP Drone %d", DRONE_ID);
-  // queen = new Comm(2, 3);
-  Sensor::set_laser_pin(2);
-  tracker = new Tracker(0, 15, 4, 19);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
   left_motor = new Motor(11, 13);
   right_motor = new Motor(3, 12);
   odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
@@ -47,6 +53,10 @@ void setup()
   MotorDriver::right_motor = right_motor;
   MotorDriver::odometry = odometry;
   motor_driver = MotorDriver::get_instance();
+  debug->log("Starting UP Drone %d", DRONE_ID);
+  // queen = new Comm(2, 3);
+  Sensor::set_laser_pin(2);
+  tracker = new Tracker(0, 1, 4);
 
 
   free_memory_timer = new Metro(1000);
@@ -54,22 +64,38 @@ void setup()
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(200.0, -200.0);
+  motor_driver->set(200.0, 200.0);
 }
 
 void loop()
 {
+  if (test_timer.check())
+  {
+    test_count++;
+    switch(test_count % 3)
+    {
+    case 0:
+      motor_driver->set(150, 150);
+      break;
+    case 1:
+      motor_driver->set(175, 150);
+      break;
+    case 2:
+      motor_driver->set(150, 175);
+      break;
+    }
+  }
+  return;
   long left_encoder_value, right_encoder_value;
   tracker->loop();
   odometry->loop();
-  motor_driver->loop();
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
-      // search();
+      search();
       break;
     case StateMachine::ATTACKING:
-      // attack();
+      attack();
       break;
   }
 
@@ -138,29 +164,23 @@ void delegate_message(Message_t *message)
 
 void search(void)
 {
-  left_motor->set(0, CCW);
-  right_motor->set(0, CCW);
+  if (attack_timer.check())
+  {
+    attack_count++;
+    if (attack_count%30 == 0)
+    {
+      left_motor->set(255, CW);
+      right_motor->set(255, CCW);
+    }
+    else
+    {
+      left_motor->set(0, CW);
+      right_motor->set(0, CW);
+    }
+  }
 }
 
 void attack(void)
 {
-  float speed_scale = 1.0;
-  int heading_to_prey = tracker->prey_position - PREY_CENTER_ANGLE;
-  // the amount to slow one tread by to make the drone turn towards the prey
-  float offset = 0.8f - (0.8f * (float)abs(heading_to_prey) / 90.0f);
-  // prey is to the right of the robot (slow down left tread)
-  if (heading_to_prey < 0)
-  {
-    left_motor->set(255.0 * speed_scale * offset, CCW);
-    right_motor->set(255.0 * speed_scale, CCW);
-    // offset the laser outwards so it is less likely to skip over the prey
-    // tracker->right_sensor->move_servo(SERVO_RIGHT, 2);
-  }
-  // prey is to the left of the robot (slow down right tread)
-  else if (heading_to_prey > 0)
-  {
-    left_motor->set(255.0 * speed_scale, CCW);
-    right_motor->set(255.0 * speed_scale * offset, CCW);
-    // tracker->left_sensor->move_servo(SERVO_LEFT, 2);
-  }
+  // motor_driver->loop();
 }

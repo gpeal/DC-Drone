@@ -13,7 +13,7 @@
 12-    Left Motor Direction
 13-    Right Motor Direction
 A0/14- Left Phototransistor
-A1/15- Left Servo
+A1/15- Middle Phototransistor
 A2/16- Door Phototransistor
 A3/17- Door Servo
 A4/18- Right Phototransistor

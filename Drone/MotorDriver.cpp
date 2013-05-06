@@ -105,13 +105,14 @@ void MotorDriver::set(float target_left_velocity, float target_right_velocity)
     left_direction = CCW;
   else
     left_direction = CW;
+
   if (target_right_velocity >= 0)
     right_direction = CCW;
   else
     right_direction = CW;
   // TODO pick a better number for this
-  left_motor->set(50, left_direction);
-  right_motor->set(50, right_direction);
+  left_motor->set(target_left_velocity, left_direction);
+  right_motor->set(target_right_velocity, right_direction);
 }
 
 MotorDriver *MotorDriver::get_instance(void)

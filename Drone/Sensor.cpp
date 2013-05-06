@@ -2,19 +2,12 @@
 #include "Sensor.h"
 #include "Tracker.h"
 
-Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
-  : transistor_pin(_transistor_pin)
+Sensor::Sensor(int transistor_pin)
+  :transistor_pin(transistor_pin)
 {
-  servo = new Servo();
-  servo->attach(_servo_pin);
-  pos = SERVO_MIN_POS;
-  pos_ra = new RunningAverage(50);
-  servo->write(pos);
-  direction = !edge;
   last_reading = 0;
-  last_found_pos = (int)((SERVO_MAX_POS - SERVO_MIN_POS) / 2);
   last_found_millis = -1;
-  delta_threshold = 40;
+  consecutive_hit_count = 0;
   debug->log("Initializing Tracker");
 }
 
@@ -26,47 +19,7 @@ Sensor::Sensor(int _servo_pin, int _transistor_pin, int edge)
  */
 void Sensor::calibrate()
 {
-  // int deltas[CALIBRATION_SIZE];
-  // int delta;
-  // int number_of_valid_readings = 0;
-  // int sum_of_valid_readings = 0;
-  // Metro calibration_timer(15);
-
-  // for (int i = 0; i < CALIBRATION_SIZE; i++)
-  // {
-  //   deltas[i] = CALIBRATION_DEFAULT;
-  // }
-
-  // while(pos <= SERVO_MAX_POS)
-  // {
-  //   if (calibration_timer.check())
-  //   {
-  //       make_reading();
-  //       Sensor::toggle_laser();
-  //       for (int i = 0; i < CALIBRATION_SIZE; i++)
-  //       {
-  //         if (last_delta < deltas[i] && last_delta >= 1)
-  //         {
-  //           deltas[i] = last_delta;
-  //           break;
-  //         }
-  //       }
-  //       // debug->log("Servo Pos: %d, %d", (int)pos, last_delta);
-  //       debug->log("Min Deltas: [%d, %d, %d, %d, %d]", deltas[0], deltas[1], deltas[2], deltas[3], deltas[4]);
-  //       move_servo(SERVO_RIGHT, 3);
-  //   }
-  // }
-  // // find the average valid reading
-  // for (int i = 0; i < CALIBRATION_SIZE; i++)
-  // {
-  //   if (deltas[i] != CALIBRATION_DEFAULT)
-  //   {
-  //     number_of_valid_readings++;
-  //     sum_of_valid_readings += deltas[i];
-  //   }
-  // }
-  // delta_threshold = 4 * sum_of_valid_readings / number_of_valid_readings;
-  delta_threshold = 4;
+  delta_threshold = 100;
   debug->log("Delta threshold: %d", delta_threshold);
 }
 
@@ -89,29 +42,13 @@ void Sensor::make_reading(void)
 
   if (hit_prey())
   {
-    last_found_pos = pos;
     last_found_millis = millis();
+    consecutive_hit_count++;
   }
-  pos_ra->addValue(pos);
-}
-
-void Sensor::move_servo(int direction, float amount)
-{
-  int adjusted_pos;
-  if (direction == SERVO_LEFT)
+  else
   {
-    pos -= amount;
+    consecutive_hit_count = 0;
   }
-  else if (direction == SERVO_RIGHT)
-  {
-    pos += amount;
-  }
-  // debug->log("Pos: %d %d", (int)pos, (int)amount);
-
-  // in reality, 180 is on the left and 0 is on the right which is reverse of what it
-  // logically should be so reverse it here
-  adjusted_pos = 180 - pos;
-  servo->writeMicroseconds(1000.0 + (1000.0/180.0) * adjusted_pos);
 }
 
 /**
@@ -131,12 +68,12 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  return abs(pos - pos_ra->getAverage()) < RECENT_HIT_POS_THRESHOLD;
+  // TODO fix this
+  return consecutive_hit_count > 3;
 }
 
 void Sensor::set_laser_pin(int pin)
 {
-
   laser_pin = pin;
   pinMode(laser_pin, OUTPUT);
 }
@@ -150,12 +87,4 @@ void Sensor::toggle_laser(void)
   }
   int laser_value = digitalRead(laser_pin);
   digitalWrite(laser_pin, !laser_value);
-}
-
-/**
- * Sensor::clear_pos_ra clears the position running average
- */
-void Sensor::clear_pos_ra(void)
-{
-  pos_ra->clear();
 }
