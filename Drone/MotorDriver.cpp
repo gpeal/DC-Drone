@@ -86,6 +86,14 @@ void MotorDriver::loop(void)
   right_motor->set(right_speed, right_direction);
 }
 
+/**
+ * MotorDriver::set sets the desired velocity of each tread
+ * float target_left_velocity: the desired velocity of the left tread
+ * float target_right_velocity: the desired velocity of the right tread
+ *
+ * negative values turns the tread backwards
+ * a good velocity is on the order of 300
+ */
 void MotorDriver::set(float target_left_velocity, float target_right_velocity)
 {
   MotorDirection left_direction, right_direction;
