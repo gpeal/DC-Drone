@@ -6,8 +6,8 @@
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
-#include "GPS.h"
 #include "Motor.h"
+#include "MotorDriver.h"
 #include "Odometry.h"
 #include "Sensor.h"
 #include "StateMachine.h"
@@ -21,24 +21,18 @@ Motor *left_motor;
 Motor *right_motor;
 Comm *queen;
 Odometry *odometry;
-GPS *gps;
+MotorDriver *motor_driver;
+// initialize static vars
+Motor *MotorDriver::left_motor;
+Motor *MotorDriver::right_motor;
+Odometry *MotorDriver::odometry;
+MotorDriver *MotorDriver::instance;
 
 
 Message_t *message;
 // initialize the static int Sensor::laser_pin
 int Sensor::laser_pin = -1;
 
-// temp function
-void add_test_routine()
-{
-  Coordinate waypoint;
-  waypoint.x = 0;
-  waypoint.y = 24;
-  // gps->add_waypoint(waypoint);
-  waypoint.x = 24;
-  waypoint.y = 24;
-  // gps->add_waypoint(waypoint);
-}
 
 void setup()
 {
@@ -46,33 +40,36 @@ void setup()
   // queen = new Comm(2, 3);
   Sensor::set_laser_pin(2);
   tracker = new Tracker(0, 15, 4, 19);
-  // tracker = new Tracker(5, 9, 4, 10);
   left_motor = new Motor(11, 13);
   right_motor = new Motor(3, 12);
-  // odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
-  // gps = new GPS(left_motor, right_motor, odometry);
-  add_test_routine();
+  odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
+  MotorDriver::left_motor = left_motor;
+  MotorDriver::right_motor = right_motor;
+  MotorDriver::odometry = odometry;
+  motor_driver = MotorDriver::get_instance();
+
 
   free_memory_timer = new Metro(1000);
   // TODO: is it necessary to instantiate a message_t here?
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
+  motor_driver->set(200.0, -200.0);
 }
 
 void loop()
 {
   long left_encoder_value, right_encoder_value;
   tracker->loop();
-  // odometry->loop();
-  // gps->loop();
+  odometry->loop();
+  motor_driver->loop();
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
-      search();
+      // search();
       break;
     case StateMachine::ATTACKING:
-      attack();
+      // attack();
       break;
   }
 
@@ -89,10 +86,10 @@ void free_memory_check(void)
 {
   if (free_memory_timer->check())
   {
-    if (freeMemory() < 500)
-    {
+    // if (freeMemory() < 500)
+    // {
       debug->log("Free Memory: %d", freeMemory());
-    }
+    // }
   }
 }
 

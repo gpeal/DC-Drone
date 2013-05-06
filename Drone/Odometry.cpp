@@ -5,7 +5,7 @@ Odometry::Odometry(Encoder left_encoder, Encoder right_encoder)
   :left_encoder(left_encoder),
    right_encoder(right_encoder)
 {
-  update_timer = new Metro(50);
+  update_timer = new Metro(5);
   last_left_reading = left_encoder.read();
   last_right_reading = right_encoder.read();
   heading = 0;
@@ -20,8 +20,8 @@ void Odometry::loop(void)
   float left_inches, right_inches, inches, d_heading;
   if (update_timer->check())
   {
-    left_reading = (int)left_encoder.read();
-    right_reading = (int)right_encoder.read();
+    left_reading = left_encoder.read();
+    right_reading = right_encoder.read();
 
     d_left = left_reading - last_left_reading;
     d_right = right_reading - last_right_reading;
@@ -44,7 +44,7 @@ void Odometry::loop(void)
 
     // Serial.print(left_reading);
     // Serial.print("\t");
-    // Serial.print(right_reading);
+    // Serial.println(right_reading);
     // Serial.print("\t");
     // Serial.print(distance);
     // Serial.print("\t");

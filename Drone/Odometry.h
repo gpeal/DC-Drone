@@ -18,6 +18,8 @@ public:
   Coordinate position;
   float heading;
   float distance;
+  long left_reading;
+  long right_reading;
 private:
   float x(void);
   float y(void);
@@ -26,8 +28,6 @@ private:
   Metro *update_timer;
   long last_left_reading;
   long last_right_reading;
-  long left_reading;
-  long right_reading;
 };
 
 

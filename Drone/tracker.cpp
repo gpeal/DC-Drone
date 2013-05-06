@@ -115,7 +115,7 @@ void Tracker::search(void)
   if (state == TRACKER_STATE_BOTH && abs(left_sensor->pos - right_sensor->pos) < 60.0f)
   {
     StateMachine::enter(StateMachine::ATTACKING);
-    debug->log("D:%d", (int)left_sensor->pos - (int)right_sensor->pos);
+    // debug->log("D:%d", (int)left_sensor->pos - (int)right_sensor->pos);
   }
   else
   {
