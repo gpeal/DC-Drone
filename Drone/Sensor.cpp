@@ -19,7 +19,7 @@ Sensor::Sensor(int transistor_pin)
  */
 void Sensor::calibrate()
 {
-  delta_threshold = 100;
+  delta_threshold = 20;
   debug->log("Delta threshold: %d", delta_threshold);
 }
 

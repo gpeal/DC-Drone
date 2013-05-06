@@ -27,8 +27,8 @@ Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
 Odometry *MotorDriver::odometry;
 MotorDriver *MotorDriver::instance;
-Metro attack_timer(10);
-int attack_count = 0;
+Metro search_timer(10, 1);
+int search_count = 0;
 Metro test_timer(2000);
 int test_count = 0;
 
@@ -59,33 +59,16 @@ void setup()
   tracker = new Tracker(0, 1, 4);
 
 
-  free_memory_timer = new Metro(1000);
+  free_memory_timer = new Metro(10000);
   // TODO: is it necessary to instantiate a message_t here?
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(200.0, 200.0);
+  motor_driver->set(150, 1);
 }
 
 void loop()
 {
-  if (test_timer.check())
-  {
-    test_count++;
-    switch(test_count % 3)
-    {
-    case 0:
-      motor_driver->set(150, 150);
-      break;
-    case 1:
-      motor_driver->set(175, 150);
-      break;
-    case 2:
-      motor_driver->set(150, 175);
-      break;
-    }
-  }
-  return;
   long left_encoder_value, right_encoder_value;
   tracker->loop();
   odometry->loop();
@@ -112,10 +95,10 @@ void free_memory_check(void)
 {
   if (free_memory_timer->check())
   {
-    // if (freeMemory() < 500)
-    // {
+    if (freeMemory() < 500)
+    {
       debug->log("Free Memory: %d", freeMemory());
-    // }
+    }
   }
 }
 
@@ -164,13 +147,14 @@ void delegate_message(Message_t *message)
 
 void search(void)
 {
-  if (attack_timer.check())
+  if (search_timer.check())
   {
-    attack_count++;
-    if (attack_count%30 == 0)
+    search_count++;
+    if (search_count%30 == 0)
     {
       left_motor->set(255, CW);
       right_motor->set(255, CCW);
+      debug->log("T%d", search_count);
     }
     else
     {
@@ -182,5 +166,5 @@ void search(void)
 
 void attack(void)
 {
-  // motor_driver->loop();
+  motor_driver->loop();
 }

@@ -3,116 +3,82 @@
 
 MotorDriver::MotorDriver()
 {
-  EncoderReading left_reading;
-  EncoderReading right_reading;
-  left_reading.reading = odometry->left_reading;
-  left_reading.millis = millis();
-  right_reading.reading = odometry->right_reading;
-  right_reading.millis = millis();
-
-  // this determines how many readings back the current encoder
-  // reading should be compared against to calculate velocity
-  for(int i = 0; i < HISTORY_SIZE; i++)
-  {
-    left_encoder_history[i] = left_reading;
-    right_encoder_history[i] = right_reading;
-  }
-
-  target_left_velocity = 0;
-  target_right_velocity = 0;
-
   timer = new Metro(100);
 }
 
 void MotorDriver::loop(void)
 {
-  if (!timer->check())
+  // TODO remove this
+  return;
+  int left_speed, right_speed;
+  float current_bias;
+  if (target_bias == 0 || !timer->check())
     return;
 
-  float left_velocity, right_velocity;
-  MotorDirection left_direction, right_direction;
-  int left_speed, right_speed;
+  current_bias = (float)(odometry->left_reading - starting_left_reading) /
+         (float)(odometry->right_reading - starting_right_reading);
 
-  // update left reading
-  EncoderReading left_reading;
-  left_reading.reading = odometry->left_reading;
-  left_reading.millis = millis();
-  for(int i = 0; i < HISTORY_SIZE - 1; i++)
-  {
-    left_encoder_history[i] = left_encoder_history[i + 1];
-  }
-  left_encoder_history[HISTORY_SIZE - 1] = left_reading;
 
-  // update right reading
-  EncoderReading right_reading;
-  right_reading.reading = odometry->right_reading;
-  right_reading.millis = millis();
-  for(int i = 0; i < HISTORY_SIZE - 1; i++)
-  {
-    right_encoder_history[i] = right_encoder_history[i + 1];
-  }
-  right_encoder_history[HISTORY_SIZE - 1] = right_reading;
+  if (current_bias > target_bias)
+    bias *= 0.9;
+  else if (current_bias < target_bias)
+    bias *= 1.1;
 
-  // calculate velocity from reading
-  left_velocity = (float)(left_encoder_history[HISTORY_SIZE - 1].reading -
-                          left_encoder_history[0].reading) /
-                  (float)(left_encoder_history[HISTORY_SIZE - 1].millis -
-                          left_encoder_history[0].millis) * 10000.0;
-  right_velocity = (float)(right_encoder_history[HISTORY_SIZE - 1].reading -
-                          right_encoder_history[0].reading) /
-                  (float)(right_encoder_history[HISTORY_SIZE - 1].millis -
-                          right_encoder_history[0].millis) * 10000.0;
-  if (target_left_velocity >= 0)
-    left_direction = CCW;
-  else
-    left_direction = CW;
-  if (target_right_velocity >= 0)
-    right_direction = CCW;
-  else
-    right_direction = CW;
+  bias = cap(bias, 0.4, 1.6);
 
-  // left_speed = (int)cap(abs(target_left_velocity / left_velocity) * (float)left_motor->speed, 0.0, 255.0);
-  // right_speed = (int)cap(abs(target_right_velocity / right_velocity) * (float)right_motor->speed, 0.0, 255.0);
-  // prevent dividing by zero
-  if (abs(left_velocity) < 1)
-    left_velocity = 1 * target_left_velocity / abs(target_left_velocity);
-  if (abs(right_velocity) < 1)
-    right_velocity = 1 * target_right_velocity / abs(target_right_velocity);
-  left_speed = cap(left_motor->speed + 20 * (target_left_velocity / left_velocity - 1), 0.0, 255.0);
-  right_speed = cap(right_motor->speed + 20 * (target_right_velocity / right_velocity - 1), 0.0, 255.0);
-  debug->log("V:%d\t%d\t%d\t%d", (int)(left_velocity), (int)(right_velocity), (int)left_speed, (int)right_speed);
-
+  left_speed = cap((int)((float)target_speed * bias), 0, 255);
+  right_speed = target_speed;
+  // debug->log("D:%d\t%d\t%d\t%d\t%d\t%d\t%d", (int)(odometry->left_reading - starting_left_reading),
+  //                        (int)(odometry->right_reading - starting_right_reading),
+  //                        (int)(current_bias * 100.0),
+  //                        (int)(bias * 100),
+  //                        (int)(target_bias * 100.0),
+  //                        left_speed,
+  //                        right_speed);
   left_motor->set(left_speed, left_direction);
   right_motor->set(right_speed, right_direction);
 }
 
 /**
  * MotorDriver::set sets the desired velocity of each tread
- * float target_left_velocity: the desired velocity of the left tread
- * float target_right_velocity: the desired velocity of the right tread
+ * int speed sets the desired speed
+ * float target_bias sets the ration of left encoder counts / right encoder counts
+ * a target_bias of 0 will make the treads spin in opposite directions
  *
  * negative values turns the tread backwards
  * a good velocity is on the order of 300
  */
-void MotorDriver::set(float target_left_velocity, float target_right_velocity)
+void MotorDriver::set(int target_speed, float target_bias)
 {
-  MotorDirection left_direction, right_direction;
+  this->target_bias = target_bias;
+  this->target_speed = target_speed;
+  starting_left_reading = odometry->left_reading;
+  starting_right_reading = odometry->right_reading;
 
-  this->target_left_velocity = target_left_velocity;
-  this->target_right_velocity = target_right_velocity;
-
-  if (target_left_velocity >= 0)
-    left_direction = CCW;
-  else
+  if (target_bias == 0)
+  {
     left_direction = CW;
-
-  if (target_right_velocity >= 0)
     right_direction = CCW;
+    left_motor->set(255, left_direction);
+    right_motor->set(255, right_direction);
+    return;
+  }
+
+  if (target_speed >= 0)
+  {
+    left_direction = CCW;
+    right_direction = CCW;
+  }
   else
+  {
+    left_direction = CW;
     right_direction = CW;
+    target_speed = abs(target_speed);
+  }
+
   // TODO pick a better number for this
-  left_motor->set(target_left_velocity, left_direction);
-  right_motor->set(target_right_velocity, right_direction);
+  left_motor->set(cap((int)((float)target_speed * bias), 0, 255), left_direction);
+  right_motor->set(target_speed, right_direction);
 }
 
 MotorDriver *MotorDriver::get_instance(void)

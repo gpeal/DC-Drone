@@ -17,14 +17,14 @@ class MotorDriver
 public:
   MotorDriver();
   void loop(void);
-  void set(float target_left_velocity, float target_right_velocity);
-  // keep the last n times the encoder changed in a queue
-  // compare the nth most recent recording to the most recent
-  // recording to calculate velocity
-  EncoderReading left_encoder_history[HISTORY_SIZE];
-  EncoderReading right_encoder_history[HISTORY_SIZE];
-  float target_left_velocity;
-  float target_right_velocity;
+  void set(int target_speed, float target_bias);
+  int target_speed;
+  MotorDirection left_direction;
+  MotorDirection right_direction;
+  long starting_left_reading;
+  long starting_right_reading;
+  float target_bias;
+  float bias;
   Metro *timer;
   static MotorDriver *get_instance(void);
   static Motor *left_motor;

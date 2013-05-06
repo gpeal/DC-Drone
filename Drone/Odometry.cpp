@@ -6,8 +6,10 @@ Odometry::Odometry(Encoder left_encoder, Encoder right_encoder)
    right_encoder(right_encoder)
 {
   update_timer = new Metro(5);
-  last_left_reading = left_encoder.read();
-  last_right_reading = right_encoder.read();
+  left_reading = left_encoder.read();
+  last_right_reading = left_reading;
+  right_reading = right_encoder.read();
+  last_right_reading = right_reading;
   heading = 0;
   distance = 0;
   position.x = 0;

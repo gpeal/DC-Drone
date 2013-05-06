@@ -17,7 +17,7 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_middle, int transis
 
   motor_driver = MotorDriver::get_instance();
 
-  execute_timer = new Metro(50);
+  execute_timer = new Metro(20);
   left_sensor->calibrate();
   middle_sensor->calibrate();
   right_sensor->calibrate();
@@ -75,12 +75,13 @@ void Tracker::search(void)
   right = right_sensor->recently_hit_prey();
   new_state = ((int)left_sensor->recently_hit_prey() << 2) | ((int)middle_sensor->recently_hit_prey() << 1) | ((int)right_sensor->recently_hit_prey());
   if (digitalRead(Sensor::laser_pin) == HIGH)
-    // debug->log("R: %d\t%d\t%d\t%d", left_sensor->last_delta, middle_sensor->last_delta, right_sensor->last_delta, state);
-
+    // debug->log("S%d", state);
   if (new_state == state)
     return;
 
   state = new_state;
+  // remove wheel momentum which would cause it to turn initially when
+  // going from spinning to going straight
   switch(state)
   {
     case TRACKER_STATE_NONE:
@@ -88,31 +89,31 @@ void Tracker::search(void)
       StateMachine::enter(StateMachine::SEARCHING);
       break;
     case TRACKER_STATE_RIGHT:
-      motor_driver->set(175, 120);
+      motor_driver->set(150, 0.6);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE:
-      motor_driver->set(140, 150);
+      motor_driver->set(225, 0.2);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE_RIGHT:
-      motor_driver->set(170, 150);
+      motor_driver->set(150, 0.8);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT:
-      motor_driver->set(120, 175);
+      motor_driver->set(150, 1.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_RIGHT:
-      motor_driver->set(120, 120);
+      motor_driver->set(150, 1.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE:
-      motor_driver->set(150, 160);
+      motor_driver->set(150, 1.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE_RIGHT:
-      motor_driver->set(120, 120);
+      motor_driver->set(150, 1.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
   }
