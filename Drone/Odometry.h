@@ -4,9 +4,9 @@
 #include <Metro.h>
 #include "Utils.h"
 
-#define WHEEL_BASE 11.86f
-#define LEFT_CLICKS_PER_INCH 4.6666f
-#define RIGHT_CLICKS_PER_INCH 4.6666f
+#define WHEEL_BASE 0.1f
+#define LEFT_CLICKS_PER_INCH 10.458f
+#define RIGHT_CLICKS_PER_INCH 10.458f
 #define PI 3.14159f
 #define TWOPI 2.0f * PI
 

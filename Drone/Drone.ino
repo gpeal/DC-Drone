@@ -48,7 +48,7 @@ void setup()
   pinMode(A5, INPUT);
   left_motor = new Motor(11, 13);
   right_motor = new Motor(3, 12);
-  odometry = new Odometry(Encoder(7, 6), Encoder(9, 10));
+  odometry = new Odometry(Encoder(6, 7), Encoder(9, 10));
   MotorDriver::left_motor = left_motor;
   MotorDriver::right_motor = right_motor;
   MotorDriver::odometry = odometry;
@@ -72,6 +72,7 @@ void loop()
   long left_encoder_value, right_encoder_value;
   tracker->loop();
   odometry->loop();
+  return;
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
@@ -152,7 +153,6 @@ void search(void)
   int ramp_up_time = 10;
   int ticks_to_skip =  (float)(millis() - StateMachine::enter_millis) / 1000.0 * -(float)(max_ticks - min_ticks) / (float)ramp_up_time + max_ticks;
   ticks_to_skip = cap(ticks_to_skip, min_ticks, max_ticks);
-  debug->log("T:%d", ticks_to_skip);
 
   if (search_timer.check())
   {

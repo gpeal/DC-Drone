@@ -50,6 +50,8 @@ void MotorDriver::loop(void)
  */
 void MotorDriver::set(int target_speed, float target_bias)
 {
+  // TODO remove this
+  return;
   int left_speed1, left_speed, right_speed;
   this->target_bias = target_bias;
   this->target_speed = target_speed;

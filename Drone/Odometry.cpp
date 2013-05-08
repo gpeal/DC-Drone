@@ -5,7 +5,9 @@ Odometry::Odometry(Encoder left_encoder, Encoder right_encoder)
   :left_encoder(left_encoder),
    right_encoder(right_encoder)
 {
-  update_timer = new Metro(5);
+  left_encoder.write(0);
+  right_encoder.write(0);
+  update_timer = new Metro(100);
   left_reading = left_encoder.read();
   last_right_reading = left_reading;
   right_reading = right_encoder.read();
@@ -18,12 +20,13 @@ Odometry::Odometry(Encoder left_encoder, Encoder right_encoder)
 
 void Odometry::loop(void)
 {
-  int d_left, d_right, d_distance;
-  float left_inches, right_inches, inches, d_heading;
+  int d_left, d_right;
+  float left_inches, right_inches, inches, d_heading, d_distance;
+  // these must be called regularly
+  left_reading = left_encoder.read();
+  right_reading = right_encoder.read();
   if (update_timer->check())
   {
-    left_reading = left_encoder.read();
-    right_reading = right_encoder.read();
 
     d_left = left_reading - last_left_reading;
     d_right = right_reading - last_right_reading;
@@ -33,20 +36,18 @@ void Odometry::loop(void)
 
     left_inches = (float)d_left/LEFT_CLICKS_PER_INCH;
     right_inches = (float)d_right/RIGHT_CLICKS_PER_INCH;
-    d_distance = (left_inches + right_inches) / 2.0;
 
     d_heading = left_inches - right_inches;
     heading += d_heading / WHEEL_BASE;
-    // heading -= (float)((int)(heading/TWOPI))*TWOPI;
+    // heading -= (float)((int)(heading/360))*360;
 
-    // position.x += d_distance * cos(heading);
-    // position.y += d_distance * sin(heading);
+    d_distance = (left_inches + right_inches) / 2.0;
+    position.x += d_distance * cos(heading * PI / 180.0);
+    position.y += d_distance * sin(heading * PI / 180.0);
     distance += d_distance;
 
 
-    // Serial.print(left_reading);
-    // Serial.print("\t");
-    // Serial.println(right_reading);
+    debug->log("R%d\t%d", (int)(position.x * 100), (int)(position.y * 100));
     // Serial.print("\t");
     // Serial.print(distance);
     // Serial.print("\t");
