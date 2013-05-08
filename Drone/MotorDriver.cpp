@@ -3,40 +3,42 @@
 
 MotorDriver::MotorDriver()
 {
-  timer = new Metro(100);
+  timer = new Metro(200);
+  average_left_speed_ra = new RunningAverage(RUNNING_AVERAGE_SIZE);
+  average_right_speed_ra = new RunningAverage(RUNNING_AVERAGE_SIZE);
 }
 
 void MotorDriver::loop(void)
 {
-  // TODO remove this
-  return;
+  long left_reading_diff, right_reading_diff;
+  float seconds_diff;
+  float current_left_speed, current_right_speed;
   int left_speed, right_speed;
-  float current_bias;
-  if (target_bias == 0 || !timer->check())
+  float left_speed_bias, right_speed_bias;
+  if (!timer->check())
     return;
 
-  current_bias = (float)(odometry->left_reading - starting_left_reading) /
-         (float)(odometry->right_reading - starting_right_reading);
+  seconds_diff = (float)((millis() - last_update_millis) / 1000.0);
+  last_update_millis = millis();
 
+  left_reading_diff = odometry->left_reading - last_left_reading;
+  last_left_reading = odometry->left_reading;
+  current_left_speed = abs((float)left_reading_diff / seconds_diff);
+  average_left_speed_ra->addValue(current_left_speed);
 
-  if (current_bias > target_bias)
-    bias *= 0.9;
-  else if (current_bias < target_bias)
-    bias *= 1.1;
+  right_reading_diff = odometry->right_reading - last_right_reading;
+  last_right_reading = odometry->right_reading;
+  current_right_speed = abs((float)right_reading_diff / seconds_diff);
+  average_right_speed_ra->addValue(current_right_speed);
 
-  bias = cap(bias, 0.4, 1.6);
+  left_speed_bias = cap(target_right_speed / average_left_speed_ra->getAverage(), 0.98, 1.02);
+  right_speed_bias = cap(target_right_speed / average_right_speed_ra->getAverage(), 098., 1.02);
 
-  left_speed = cap((int)((float)target_speed * bias), 0, 255);
-  right_speed = target_speed;
-  // debug->log("D:%d\t%d\t%d\t%d\t%d\t%d\t%d", (int)(odometry->left_reading - starting_left_reading),
-  //                        (int)(odometry->right_reading - starting_right_reading),
-  //                        (int)(current_bias * 100.0),
-  //                        (int)(bias * 100),
-  //                        (int)(target_bias * 100.0),
-  //                        left_speed,
-  //                        right_speed);
-  left_motor->set(left_speed, left_direction);
-  right_motor->set(right_speed, right_direction);
+  left_speed = cap((int)((float)left_motor->speed * left_speed_bias), 0, 255);
+  left_motor->set(left_speed, left_motor->direction);
+  right_speed = cap((int)((float)right_motor->speed * right_speed_bias), 0, 200);
+  right_motor->set(right_speed, right_motor->direction);
+  debug->log("SP%d\t%d\t%d\t%d", (int)(average_left_speed_ra->getAverage()), (int)(average_right_speed_ra->getAverage()), left_speed, right_speed);
 }
 
 /**
@@ -48,42 +50,30 @@ void MotorDriver::loop(void)
  * negative values turns the tread backwards
  * a good velocity is on the order of 300
  */
-void MotorDriver::set(int target_speed, float target_bias)
+void MotorDriver::set(float target_left_speed, float target_right_speed)
 {
-  // TODO remove this
-  return;
-  int left_speed1, left_speed, right_speed;
-  this->target_bias = target_bias;
-  this->target_speed = target_speed;
-  starting_left_reading = odometry->left_reading;
-  starting_right_reading = odometry->right_reading;
+  MotorDirection left_direction, right_direction;
+  this->target_left_speed = target_left_speed;
+  this->target_right_speed = target_right_speed;
+  last_left_reading = odometry->left_reading;
+  last_right_reading = odometry->right_reading;
+  last_update_millis = millis();
+  average_left_speed_ra->fillValue(target_left_speed, RUNNING_AVERAGE_SIZE);
+  average_right_speed_ra->fillValue(target_right_speed, RUNNING_AVERAGE_SIZE);
 
-  if (target_bias == 0)
-  {
-    left_direction = BACKWARD;
-    right_direction = FORWARD;
-    left_motor->set(255, left_direction);
-    right_motor->set(255, right_direction);
-    return;
-  }
-
-  if (target_speed >= 0)
-  {
+  if (target_left_speed >= 0)
     left_direction = FORWARD;
-    right_direction = FORWARD;
-  }
   else
-  {
     left_direction = BACKWARD;
-    right_direction = BACKWARD;
-    target_speed = abs(target_speed);
-  }
 
-  left_speed = target_speed;
-  right_speed = cap((int)((float)target_speed * target_bias), 0, 255);
-  // debug->log("SP:%d\t%d\t%d", left_speed1, left_speed, right_speed);
-  left_motor->set(left_speed, left_direction);
-  right_motor->set(right_speed, right_direction);
+  if (target_right_speed >= 0)
+    right_direction = FORWARD;
+  else
+    right_direction = BACKWARD;
+
+  left_motor->set(target_left_speed * 100, left_direction);
+  right_motor->set(target_right_speed * 100, right_direction);
+
 }
 
 MotorDriver *MotorDriver::get_instance(void)

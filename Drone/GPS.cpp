@@ -29,13 +29,13 @@ void GPS::loop(void)
     {
       left_motor->set(255.0 * SPEED, CCW);
       right_motor->set(255.0 * SPEED, CW);
-      debug->log("left");
+      // debug->log("left");
     }
     else if (_heading_to_target > 0)
     {
       left_motor->set(255.0 * SPEED, CW);
       right_motor->set(255.0 * SPEED, CCW);
-      debug->log("right");
+      // debug->log("right");
     }
   }
   // the robot is facing in the right vicinity
@@ -47,19 +47,19 @@ void GPS::loop(void)
     {
       left_motor->set(255 * SPEED * offset, CCW);
       right_motor->set(255 * SPEED, CCW);
-      debug->log("sleft %d\t%d", (int)(offset * 100), (int)_heading_to_target);
+      // debug->log("sleft %d\t%d", (int)(offset * 100), (int)_heading_to_target);
     }
     else if (_heading_to_target > 0)
     {
       left_motor->set(255 * SPEED, CCW);
       right_motor->set(255 * SPEED * offset, CCW);
-      debug->log("sright %d\t%d", (int)(offset * 100), (int)_heading_to_target);
+      // debug->log("sright %d\t%d", (int)(offset * 100), (int)_heading_to_target);
     }
     else
     {
       left_motor->set(255 * SPEED, CCW);
       right_motor->set(255 * SPEED, CCW);
-      debug->log("straight");
+      // debug->log("straight");
     }
   }
   if (reached_target())

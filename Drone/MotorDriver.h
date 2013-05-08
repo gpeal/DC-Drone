@@ -3,8 +3,9 @@
 #include <Metro.h>
 #include "Motor.h"
 #include "Odometry.h"
+#include "RunningAverage.h"
 
-#define HISTORY_SIZE 5
+#define RUNNING_AVERAGE_SIZE 3
 
 typedef struct EncoderReading
 {
@@ -17,20 +18,23 @@ class MotorDriver
 public:
   MotorDriver();
   void loop(void);
-  void set(int target_speed, float target_bias);
+  void set(float target_left_speed, float target_right_speed);
   int target_speed;
   MotorDirection left_direction;
   MotorDirection right_direction;
-  long starting_left_reading;
-  long starting_right_reading;
-  float target_bias;
-  float bias;
+  float target_left_speed;
+  float target_right_speed;
+  long last_left_reading;
+  long last_right_reading;
+  long last_update_millis;
   Metro *timer;
   static MotorDriver *get_instance(void);
   static Motor *left_motor;
   static Motor *right_motor;
   static Odometry *odometry;
 private:
+  RunningAverage *average_left_speed_ra;
+  RunningAverage *average_right_speed_ra;
   static MotorDriver *instance;
 };
 

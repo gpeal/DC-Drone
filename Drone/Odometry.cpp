@@ -47,7 +47,7 @@ void Odometry::loop(void)
     distance += d_distance;
 
 
-    debug->log("R%d\t%d", (int)(position.x * 100), (int)(position.y * 100));
+    // debug->log("R%d\t%d\t%d", (int)(position.x * 100), (int)(position.y * 100), (int)(heading * 100));
     // Serial.print("\t");
     // Serial.print(distance);
     // Serial.print("\t");

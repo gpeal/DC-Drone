@@ -6,6 +6,7 @@
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
+#include "GPS.h"
 #include "Motor.h"
 #include "MotorDriver.h"
 #include "Odometry.h"
@@ -22,6 +23,7 @@ Motor *right_motor;
 Comm *queen;
 Odometry *odometry;
 MotorDriver *motor_driver;
+GPS *gps;
 // initialize static vars
 Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
@@ -37,9 +39,22 @@ Message_t *message;
 // initialize the static int Sensor::laser_pin
 int Sensor::laser_pin = -1;
 
+// temp function
+void add_test_gps_routine()
+{
+  Coordinate waypoint;
+  waypoint.x = 0;
+  waypoint.y = 24;
+  gps->add_waypoint(waypoint);
+  waypoint.x = 24;
+  waypoint.y = 24;
+  gps->add_waypoint(waypoint);
+}
+
 
 void setup()
 {
+  debug->log("Starting UP Drone %d", DRONE_ID);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
@@ -53,7 +68,8 @@ void setup()
   MotorDriver::right_motor = right_motor;
   MotorDriver::odometry = odometry;
   motor_driver = MotorDriver::get_instance();
-  debug->log("Starting UP Drone %d", DRONE_ID);
+  gps = new GPS(left_motor, right_motor, odometry);
+  add_test_gps_routine();
   // queen = new Comm(2, 3);
   Sensor::set_laser_pin(2);
   tracker = new Tracker(0, 1, 4);
@@ -64,7 +80,7 @@ void setup()
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(0, 1);
+  motor_driver->set(20.0, 20.0);
 }
 
 void loop()
@@ -72,6 +88,7 @@ void loop()
   long left_encoder_value, right_encoder_value;
   tracker->loop();
   odometry->loop();
+  motor_driver->loop();
   return;
   switch(StateMachine::state())
   {
