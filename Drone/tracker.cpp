@@ -5,6 +5,13 @@
 #include "Utils.h"
 #include "StateMachine.h"
 
+/*
+ * PHOTOTRANSISTOR CIRCUIT
+ * RED END -> ANALOG IN AND 47K -> GROUND
+ * BLACK END -> +5V
+ * The colors are reversed because the red end is actually just the emitter and the black end is just the collector
+ */
+
 // OMGZ SO MUCH HARD WORK!!!
 
 Tracker::Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right)
@@ -57,7 +64,7 @@ void Tracker::execute(void)
       break;
   }
 
-  // debug->log("LR: %d\t%d", (int)left_sensor->last_reading, (int)right_sensor->last_reading);
+  // debug->log("LR: %d\t%d\t%d", (int)left_sensor->last_delta, (int)middle_sensor->last_delta, (int)right_sensor->last_delta);
   // debug->log("Ratio: %d", (int)(100.0 * ((float)left_sensor->last_delta / (float)delta_threshold)));
 }
 
@@ -74,7 +81,7 @@ void Tracker::search(void)
   middle = middle_sensor->recently_hit_prey();
   right = right_sensor->recently_hit_prey();
   new_state = ((int)left_sensor->recently_hit_prey() << 2) | ((int)middle_sensor->recently_hit_prey() << 1) | ((int)right_sensor->recently_hit_prey());
-  if (digitalRead(Sensor::laser_pin) == HIGH)
+  // if (digitalRead(Sensor::laser_pin) == HIGH)
     // debug->log("S%d", state);
   if (new_state == state)
     return;
@@ -85,23 +92,22 @@ void Tracker::search(void)
   switch(state)
   {
     case TRACKER_STATE_NONE:
-      // motor_driver->set(2, -2);
       StateMachine::enter(StateMachine::SEARCHING);
       break;
     case TRACKER_STATE_RIGHT:
-      motor_driver->set(150, 0.6);
+      motor_driver->set(225, 0.4);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE:
-      motor_driver->set(225, 0.2);
+      motor_driver->set(225, 1.3);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE_RIGHT:
-      motor_driver->set(150, 0.8);
+      motor_driver->set(225, 0.5);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT:
-      motor_driver->set(150, 1.0);
+      motor_driver->set(140, 1.7);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_RIGHT:
@@ -109,11 +115,11 @@ void Tracker::search(void)
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE:
-      motor_driver->set(150, 1.0);
+      motor_driver->set(150, 1.5);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE_RIGHT:
-      motor_driver->set(150, 1.0);
+      motor_driver->set(225, 1.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
   }

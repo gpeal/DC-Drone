@@ -17,6 +17,7 @@ namespace StateMachine
   void enter(state_t state);
   state_t state(void);
   extern state_t _state;
+  extern long enter_millis;
 };
 
 #endif

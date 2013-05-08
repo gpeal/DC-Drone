@@ -19,7 +19,18 @@ Sensor::Sensor(int transistor_pin)
  */
 void Sensor::calibrate()
 {
-  delta_threshold = 20;
+  int delta_sum = 0;
+  make_reading();
+  for(int i = 0; i < 20; i++)
+  {
+    toggle_laser();
+    make_reading();
+    delta_sum += abs(last_delta);
+    delay(10);
+  }
+
+  delta_threshold = (int)(8 * (float)delta_sum / 20);
+
   debug->log("Delta threshold: %d", delta_threshold);
 }
 

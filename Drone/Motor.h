@@ -4,6 +4,9 @@
 #define MOTOR_CW 0
 #define MOTOR_CCW 1
 
+// CW and CCW can't be changed for legacy code
+#define FORWARD CCW
+#define BACKWARD CW
 enum MotorDirection {CW, CCW};
 
 class Motor

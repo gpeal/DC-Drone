@@ -50,6 +50,7 @@ void MotorDriver::loop(void)
  */
 void MotorDriver::set(int target_speed, float target_bias)
 {
+  int left_speed1, left_speed, right_speed;
   this->target_bias = target_bias;
   this->target_speed = target_speed;
   starting_left_reading = odometry->left_reading;
@@ -57,8 +58,8 @@ void MotorDriver::set(int target_speed, float target_bias)
 
   if (target_bias == 0)
   {
-    left_direction = CW;
-    right_direction = CCW;
+    left_direction = BACKWARD;
+    right_direction = FORWARD;
     left_motor->set(255, left_direction);
     right_motor->set(255, right_direction);
     return;
@@ -66,19 +67,21 @@ void MotorDriver::set(int target_speed, float target_bias)
 
   if (target_speed >= 0)
   {
-    left_direction = CCW;
-    right_direction = CCW;
+    left_direction = FORWARD;
+    right_direction = FORWARD;
   }
   else
   {
-    left_direction = CW;
-    right_direction = CW;
+    left_direction = BACKWARD;
+    right_direction = BACKWARD;
     target_speed = abs(target_speed);
   }
 
-  // TODO pick a better number for this
-  left_motor->set(cap((int)((float)target_speed * bias), 0, 255), left_direction);
-  right_motor->set(target_speed, right_direction);
+  left_speed = target_speed;
+  right_speed = cap((int)((float)target_speed * target_bias), 0, 255);
+  // debug->log("SP:%d\t%d\t%d", left_speed1, left_speed, right_speed);
+  left_motor->set(left_speed, left_direction);
+  right_motor->set(right_speed, right_direction);
 }
 
 MotorDriver *MotorDriver::get_instance(void)

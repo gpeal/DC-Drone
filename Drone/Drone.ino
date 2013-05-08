@@ -64,7 +64,7 @@ void setup()
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(150, 1);
+  motor_driver->set(0, 1);
 }
 
 void loop()
@@ -147,14 +147,20 @@ void delegate_message(Message_t *message)
 
 void search(void)
 {
+  int min_ticks = 4;
+  int max_ticks = 30;
+  int ramp_up_time = 10;
+  int ticks_to_skip =  (float)(millis() - StateMachine::enter_millis) / 1000.0 * -(float)(max_ticks - min_ticks) / (float)ramp_up_time + max_ticks;
+  ticks_to_skip = cap(ticks_to_skip, min_ticks, max_ticks);
+  debug->log("T:%d", ticks_to_skip);
+
   if (search_timer.check())
   {
     search_count++;
-    if (search_count%30 == 0)
+    if (search_count % ticks_to_skip == 0)
     {
       left_motor->set(255, CW);
       right_motor->set(255, CCW);
-      debug->log("T%d", search_count);
     }
     else
     {
