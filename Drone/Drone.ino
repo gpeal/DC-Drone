@@ -80,7 +80,7 @@ void setup()
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(20.0, 20.0);
+  motor_driver->set(37.0, 37.0);
 }
 
 void loop()

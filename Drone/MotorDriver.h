@@ -3,9 +3,10 @@
 #include <Metro.h>
 #include "Motor.h"
 #include "Odometry.h"
-#include "RunningAverage.h"
 
-#define RUNNING_AVERAGE_SIZE 3
+#define K_P 2
+#define K_I 0.0
+#define K_D 0.2
 
 typedef struct EncoderReading
 {
@@ -24,17 +25,19 @@ public:
   MotorDirection right_direction;
   float target_left_speed;
   float target_right_speed;
+  float left_error_sum;
+  float right_error_sum;
+  float last_left_error;
+  float last_right_error;
+  long last_update_millis;
   long last_left_reading;
   long last_right_reading;
-  long last_update_millis;
   Metro *timer;
   static MotorDriver *get_instance(void);
   static Motor *left_motor;
   static Motor *right_motor;
   static Odometry *odometry;
 private:
-  RunningAverage *average_left_speed_ra;
-  RunningAverage *average_right_speed_ra;
   static MotorDriver *instance;
 };
 
