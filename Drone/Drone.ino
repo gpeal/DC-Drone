@@ -88,8 +88,6 @@ void loop()
   long left_encoder_value, right_encoder_value;
   tracker->loop();
   odometry->loop();
-  motor_driver->loop();
-  return;
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:

@@ -82,8 +82,8 @@ void MotorDriver::set(float target_left_speed, float target_right_speed)
   else
     right_direction = BACKWARD;
 
-  left_motor->set(target_left_speed * 100, left_direction);
-  right_motor->set(target_right_speed * 100, right_direction);
+  left_motor->set(target_left_speed * 7, left_direction);
+  right_motor->set(target_right_speed * 7, right_direction);
 
 }
 

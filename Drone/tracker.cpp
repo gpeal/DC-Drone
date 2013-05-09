@@ -95,31 +95,31 @@ void Tracker::search(void)
       StateMachine::enter(StateMachine::SEARCHING);
       break;
     case TRACKER_STATE_RIGHT:
-      motor_driver->set(225, 0.4);
+      motor_driver->set(35.0, 25.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE:
-      motor_driver->set(225, 1.3);
+      motor_driver->set(35.0, 35.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_MIDDLE_RIGHT:
-      motor_driver->set(225, 0.5);
+      motor_driver->set(35.0, 28.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT:
-      motor_driver->set(140, 1.7);
+      motor_driver->set(25.0, 35.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_RIGHT:
-      motor_driver->set(150, 1.0);
+      motor_driver->set(25.0, 25.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE:
-      motor_driver->set(150, 1.5);
+      motor_driver->set(28.0, 35.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
     case TRACKER_STATE_LEFT_MIDDLE_RIGHT:
-      motor_driver->set(225, 1.0);
+      motor_driver->set(35.0, 35.0);
       StateMachine::enter(StateMachine::ATTACKING);
       break;
   }
