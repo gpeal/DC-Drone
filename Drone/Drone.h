@@ -1,8 +1,9 @@
 #ifndef DRONE_H
 #define DRONE_H
 
-#define DRONE_ID 3
-#define QUEEN_ID 0
+#define QUEEN_ID 1
+#define DRONE_ID_EEPROM 0
+extern int DRONE_ID;
 
 void delegate_message(Message_t *message);
 void free_memory_check(void);
