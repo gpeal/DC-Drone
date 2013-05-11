@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <Encoder.h>
 #include <Metro.h>
 #include <MemoryFree.h>
@@ -6,7 +7,6 @@
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
-#include "GPS.h"
 #include "Motor.h"
 #include "MotorDriver.h"
 #include "Odometry.h"
@@ -14,7 +14,7 @@
 #include "StateMachine.h"
 #include "Tracker.h"
 
-#define PREY_CENTER_ANGLE 75
+int DRONE_ID;
 
 Tracker *tracker;
 Metro *free_memory_timer;
@@ -23,7 +23,6 @@ Motor *right_motor;
 Comm *queen;
 Odometry *odometry;
 MotorDriver *motor_driver;
-GPS *gps;
 // initialize static vars
 Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
@@ -39,21 +38,9 @@ Message_t *message;
 // initialize the static int Sensor::laser_pin
 int Sensor::laser_pin = -1;
 
-// temp function
-void add_test_gps_routine()
-{
-  Coordinate waypoint;
-  waypoint.x = 0;
-  waypoint.y = 24;
-  gps->add_waypoint(waypoint);
-  waypoint.x = 24;
-  waypoint.y = 24;
-  gps->add_waypoint(waypoint);
-}
-
-
 void setup()
 {
+  DRONE_ID = EEPROM.read(DRONE_ID_EEPROM);
   debug->log("Starting UP Drone %d", DRONE_ID);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -61,17 +48,17 @@ void setup()
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
   pinMode(A5, INPUT);
-  left_motor = new Motor(11, 13);
-  right_motor = new Motor(3, 12);
-  odometry = new Odometry(Encoder(6, 7), Encoder(9, 10));
+  left_motor = new Motor(3, 12);
+  right_motor = new Motor(11, 13);
+  // odometry = new Odometry(Encoder(9, 10), Encoder(6, 7));
   MotorDriver::left_motor = left_motor;
   MotorDriver::right_motor = right_motor;
-  MotorDriver::odometry = odometry;
+  left_motor->set(1000, FORWARD);
+  right_motor->set(255, FORWARD);
+  // MotorDriver::odometry = odometry;
   motor_driver = MotorDriver::get_instance();
-  gps = new GPS(left_motor, right_motor, odometry);
-  add_test_gps_routine();
-  // queen = new Comm(2, 3);
-  Sensor::set_laser_pin(2);
+  queen = new Comm(6, 7);
+  Sensor::set_laser_pin(19);
   tracker = new Tracker(0, 1, 4);
 
 
@@ -80,14 +67,21 @@ void setup()
   message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  motor_driver->set(37.0, 37.0);
+  strcpy(message->payload, "Test");
 }
 
 void loop()
 {
   long left_encoder_value, right_encoder_value;
   tracker->loop();
-  odometry->loop();
+  // odometry->loop();
+  message = queen->loop();
+
+  if (message != NULL)
+  {
+    delegate_message(message);
+  }
+
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
@@ -122,7 +116,6 @@ void send_heartbeat(void)
 {
   message->type = MT_HEARTBEAT;
   sprintf(message->payload, "%d,%d", StateMachine::state(), freeMemory());
-  queen->send(message);
   debug->log("Sent heartbeat");
 }
 
