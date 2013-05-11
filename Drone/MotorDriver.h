@@ -4,9 +4,9 @@
 #include "Motor.h"
 #include "Odometry.h"
 
-#define K_P 2
+#define K_P 0.005
 #define K_I 0.0
-#define K_D 0.2
+#define K_D 0.0001
 
 typedef struct EncoderReading
 {

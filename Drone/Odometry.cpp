@@ -9,7 +9,7 @@ Odometry::Odometry(Encoder left_encoder, Encoder right_encoder)
   right_encoder.write(0);
   update_timer = new Metro(100);
   left_reading = left_encoder.read();
-  last_right_reading = left_reading;
+  last_left_reading = left_reading;
   right_reading = right_encoder.read();
   last_right_reading = right_reading;
   heading = 0;
@@ -46,8 +46,8 @@ void Odometry::loop(void)
     position.y += d_distance * sin(heading * PI / 180.0);
     distance += d_distance;
 
-
-    // debug->log("R%d\t%d\t%d", (int)(position.x * 100), (int)(position.y * 100), (int)(heading * 100));
+    debug->log("E%d\t%d", left_reading, right_reading);
+    // debug->log("R%d\t%d\t%d", (int)(position.x), (int)(position.y), (int)(heading));
     // Serial.print("\t");
     // Serial.print(distance);
     // Serial.print("\t");
