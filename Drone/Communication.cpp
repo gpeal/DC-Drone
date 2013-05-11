@@ -18,6 +18,7 @@ Comm::Comm(int rx, int tx)
   xbee = XBee();
   xbee.begin(*comm);
   xbee_response = Rx16Response();
+  xbee_tx_response = TxStatusResponse();
   xbee_request = Tx16Request();
 }
 
@@ -42,7 +43,8 @@ Message_t *Comm::loop(void)
     {
       xbee_message[i] = (char)xbee_response.getData()[i];
     }
-    debug->log("Rcv (%X): %s", xbee_response.getRemoteAddress16(), xbee_message);
+    xbee_message[xbee_response.getDataLength()] = '\0';
+    // debug->log("Rcv (%X, %d): %s", xbee_response.getRemoteAddress16(), xbee_response.getDataLength(), xbee_message);
     // if the payload is empty, fill it with a dummy payload.
     // this is only necessary to help with the sscanf string parsing
     // which breaks on empty payloads otherwise
@@ -58,6 +60,21 @@ Message_t *Comm::loop(void)
       return NULL;
     }
     return message;
+  }
+  else if (xbee.getResponse().isAvailable() && xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
+    xbee.getResponse().getZBTxStatusResponse(xbee_tx_response);
+    // get the delivery status, the fifth byte
+    if (xbee_tx_response.getStatus() == SUCCESS)
+    {
+       debug->log("TX success");
+    }
+    else
+    {
+      debug->logl(ERROR, "TX error1");
+    }
+  }
+  else if (xbee.getResponse().isAvailable() && xbee.getResponse().isError()) {
+    debug->logl(ERROR, "XBEE error");
   }
   return NULL;
 }
@@ -117,5 +134,6 @@ void Comm::send(Message_t *message)
     payload[i] = (uint8_t)buffer[i];
   }
   xbee_request = Tx16Request(QUEEN_ID, payload, sizeof(payload));
+  debug->log("Sending");
   xbee.send(xbee_request);
 }

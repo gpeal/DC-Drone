@@ -45,6 +45,7 @@ private:
   Tx16Request xbee_request;
   char xbee_message[MAX_MESSAGE_LENGTH];
   Message_t *parse_message(char *input);
+  TxStatusResponse xbee_tx_response;
 };
 
 #endif
