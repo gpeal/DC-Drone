@@ -15,6 +15,7 @@ void StateMachine::Searching::loop(void)
   int ramp_up_time;
   int ticks_to_skip;
 
+  tracker->loop();
   if (tracker->state != TRACKER_STATE_NONE)
   {
     enter(ATTACKING);

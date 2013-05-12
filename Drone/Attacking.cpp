@@ -6,6 +6,7 @@ Tracker *StateMachine::Attacking::tracker;
 
 void StateMachine::Attacking::loop(void)
 {
+  tracker->loop();
   switch(tracker->state)
   {
     case TRACKER_STATE_NONE:

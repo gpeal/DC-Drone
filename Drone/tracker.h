@@ -24,12 +24,13 @@ class Tracker
     Tracker();
     void loop(void);
     Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right);
+    Tracker(int transistor_pin_left, int transistor_pin_right);
+    void init(void);
     Sensor *left_sensor;
     Sensor *right_sensor;
     Sensor *middle_sensor;
   private:
     // does one sweep of the servo to determine what the reading threshold should be
-    void execute(void);
     void search(void);
     int last_delta;
     Metro *execute_timer;

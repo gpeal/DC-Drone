@@ -72,8 +72,6 @@ void set_state_objects(void)
 void loop()
 {
   long left_encoder_value, right_encoder_value;
-  tracker->loop();
-  // odometry->loop();
   message = queen->loop();
 
   if (message != NULL)
@@ -91,12 +89,6 @@ void loop()
       break;
   }
 
-
-  message = queen->loop();
-  if (message != NULL)
-  {
-    delegate_message(message);
-  }
   free_memory_check();
 }
 
