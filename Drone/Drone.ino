@@ -9,10 +9,10 @@
 #include "Drone.h"
 #include "Motor.h"
 #include "MotorDriver.h"
-#include "Odometry.h"
 #include "Sensor.h"
 #include "StateMachine.h"
 #include "Tracker.h"
+#include "Utils.h"
 
 int DRONE_ID;
 
@@ -21,12 +21,10 @@ Metro *free_memory_timer;
 Motor *left_motor;
 Motor *right_motor;
 Comm *queen;
-Odometry *odometry;
 MotorDriver *motor_driver;
 // initialize static vars
 Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
-Odometry *MotorDriver::odometry;
 MotorDriver *MotorDriver::instance;
 Metro search_timer(10, 1);
 int search_count = 0;
@@ -42,29 +40,31 @@ void setup()
 {
   DRONE_ID = EEPROM.read(DRONE_ID_EEPROM);
   debug->log("Starting UP Drone %d", DRONE_ID);
+
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
   pinMode(A5, INPUT);
+
   left_motor = new Motor(3, 12);
   right_motor = new Motor(11, 13);
-  // odometry = new Odometry(Encoder(9, 10), Encoder(6, 7));
   MotorDriver::left_motor = left_motor;
   MotorDriver::right_motor = right_motor;
   left_motor->set(1000, FORWARD);
   right_motor->set(255, FORWARD);
-  // MotorDriver::odometry = odometry;
   motor_driver = MotorDriver::get_instance();
+
   queen = new Comm(6, 7);
+
   Sensor::set_laser_pin(19);
   tracker = new Tracker(0, 1, 4);
 
 
   free_memory_timer = new Metro(10000);
   // TODO: is it necessary to instantiate a message_t here?
-  message = new Message_t;
+  // message = new Message_t;
   // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
   strcpy(message->payload, "Test");
@@ -117,6 +117,7 @@ void send_heartbeat(void)
   message->type = MT_HEARTBEAT;
   sprintf(message->payload, "%d,%d", StateMachine::state(), freeMemory());
   debug->log("Sent heartbeat");
+  queen->send(message);
 }
 
 /**
@@ -180,5 +181,4 @@ void search(void)
 
 void attack(void)
 {
-  motor_driver->loop();
 }

@@ -66,11 +66,11 @@ Message_t *Comm::loop(void)
     // get the delivery status, the fifth byte
     if (xbee_tx_response.getStatus() == SUCCESS)
     {
-       debug->log("TX success");
+       // debug->log("TX success");
     }
     else
     {
-      debug->logl(ERROR, "TX error1");
+      debug->logl(ERROR, "TX error");
     }
   }
   else if (xbee.getResponse().isAvailable() && xbee.getResponse().isError()) {
