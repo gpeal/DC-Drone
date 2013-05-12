@@ -4,11 +4,13 @@
 #include <MemoryFree.h>
 #include <Servo.h>
 #include <QueueList.h>
+#include "Attacking.h"
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
 #include "Motor.h"
 #include "MotorDriver.h"
+#include "Searching.h"
 #include "Sensor.h"
 #include "StateMachine.h"
 #include "Tracker.h"
@@ -18,18 +20,12 @@ int DRONE_ID;
 
 Tracker *tracker;
 Metro *free_memory_timer;
-Motor *left_motor;
-Motor *right_motor;
 Comm *queen;
 MotorDriver *motor_driver;
 // initialize static vars
 Motor *MotorDriver::left_motor;
 Motor *MotorDriver::right_motor;
 MotorDriver *MotorDriver::instance;
-Metro search_timer(10, 1);
-int search_count = 0;
-Metro test_timer(2000);
-int test_count = 0;
 
 
 Message_t *message;
@@ -48,12 +44,8 @@ void setup()
   pinMode(A4, INPUT);
   pinMode(A5, INPUT);
 
-  left_motor = new Motor(3, 12);
-  right_motor = new Motor(11, 13);
-  MotorDriver::left_motor = left_motor;
-  MotorDriver::right_motor = right_motor;
-  left_motor->set(1000, FORWARD);
-  right_motor->set(255, FORWARD);
+  MotorDriver::left_motor = new Motor(3, 12);
+  MotorDriver::right_motor = new Motor(11, 13);
   motor_driver = MotorDriver::get_instance();
 
   queen = new Comm(6, 7);
@@ -63,11 +55,18 @@ void setup()
 
 
   free_memory_timer = new Metro(10000);
-  // TODO: is it necessary to instantiate a message_t here?
-  // message = new Message_t;
-  // output battery level
   debug->log("Battery Voltage: %d", (int)readVcc());
-  strcpy(message->payload, "Test");
+}
+
+/**
+ * give the state namespaces access to any objects that they will need
+ */
+void set_state_objects(void)
+{
+  StateMachine::Searching::motor_driver = motor_driver;
+  StateMachine::Searching::tracker = tracker;
+  StateMachine::Attacking::motor_driver = motor_driver;
+  StateMachine::Attacking::tracker = tracker;
 }
 
 void loop()
@@ -85,19 +84,19 @@ void loop()
   switch(StateMachine::state())
   {
     case StateMachine::SEARCHING:
-      search();
+      StateMachine::Searching::loop();
       break;
     case StateMachine::ATTACKING:
-      attack();
+      StateMachine::Attacking::loop();
       break;
   }
 
 
-  // message = queen->loop();
-  // if (message != NULL)
-  // {
-  //   delegate_message(message);
-  // }
+  message = queen->loop();
+  if (message != NULL)
+  {
+    delegate_message(message);
+  }
   free_memory_check();
 }
 
@@ -153,30 +152,6 @@ void delegate_message(Message_t *message)
       break;
   }
   delete message;
-}
-
-void search(void)
-{
-  int min_ticks = 4;
-  int max_ticks = 30;
-  int ramp_up_time = 10;
-  int ticks_to_skip =  (float)(millis() - StateMachine::enter_millis) / 1000.0 * -(float)(max_ticks - min_ticks) / (float)ramp_up_time + max_ticks;
-  ticks_to_skip = cap(ticks_to_skip, min_ticks, max_ticks);
-
-  if (search_timer.check())
-  {
-    search_count++;
-    if (search_count % ticks_to_skip == 0)
-    {
-      left_motor->set(255, CW);
-      right_motor->set(255, CCW);
-    }
-    else
-    {
-      left_motor->set(0, CW);
-      right_motor->set(0, CW);
-    }
-  }
 }
 
 void attack(void)
