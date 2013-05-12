@@ -10,6 +10,7 @@
 #include "Drone.h"
 #include "Motor.h"
 #include "MotorDriver.h"
+#include "Returning.h"
 #include "Searching.h"
 #include "Sensor.h"
 #include "StateMachine.h"
@@ -36,6 +37,9 @@ void setup()
 {
   DRONE_ID = EEPROM.read(DRONE_ID_EEPROM);
   debug->log("Starting UP Drone %d", DRONE_ID);
+
+  // initial state
+  StateMachine::enter(StateMachine::RETURNING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -67,6 +71,9 @@ void set_state_objects(void)
   StateMachine::Searching::tracker = tracker;
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
+  // use the prey lasers until we get the top lasers
+  StateMachine::Returning::tracker = new Tracker(0, 4);
+  StateMachine::Returning::motor_driver = motor_driver;
 }
 
 void loop()

@@ -1,7 +1,8 @@
 #include "Arduino.h"
+#include "Returning.h"
 #include "StateMachine.h"
 
-StateMachine::state_t StateMachine::_state = SEARCHING;
+StateMachine::state_t StateMachine::_state;
 long StateMachine::enter_millis = millis();
 /**
  * StateMachine::enter takes a state_t and set the state to that
@@ -14,6 +15,12 @@ void StateMachine::enter(state_t new_state)
 {
   _state = new_state;
   enter_millis = millis();
+  switch(_state)
+  {
+    case RETURNING:
+      Returning::enter();
+      break;
+  }
 }
 
 StateMachine::state_t StateMachine::state(void)

@@ -38,7 +38,7 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_right)
   init();
 }
 
-Tracker::init(void)
+void Tracker::init(void)
 {
   state = TRACKER_STATE_NONE;
   motor_driver = MotorDriver::get_instance();
@@ -68,7 +68,7 @@ void Tracker::loop(void)
     }
     else
     {
-      middle_hit = (int)middle_sensor->recently_hit_prey()
+      middle_hit = (int)middle_sensor->recently_hit_prey();
     }
 
     state = ((int)left_sensor->recently_hit_prey() << 2) | (middle_hit << 1) | ((int)right_sensor->recently_hit_prey());
