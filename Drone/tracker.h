@@ -21,7 +21,7 @@ class Tracker
   public:
     Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right);
     Tracker(int transistor_pin_left, int transistor_pin_right);
-    void loop(void);
+    bool loop(void);
     void init(void);
     int state;
     Sensor *left_sensor;

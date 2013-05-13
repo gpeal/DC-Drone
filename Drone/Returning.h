@@ -34,6 +34,7 @@ namespace StateMachine
     // the time the drone started rotating to avoid the retroreflective tape that it
     // found that isn't the nest
     extern long skipping_millis;
+    extern long start_search_millis;
   }
 }
 

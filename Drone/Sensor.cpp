@@ -5,7 +5,6 @@
 Sensor::Sensor(int transistor_pin)
   :transistor_pin(transistor_pin)
 {
-  debug->log("Initializing Tracker");
   last_reading = 0;
   last_found_millis = -1;
   consecutive_hit_count = 0;
