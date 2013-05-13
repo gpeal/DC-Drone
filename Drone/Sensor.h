@@ -3,7 +3,6 @@
 
 #include <Metro.h>
 #include <Servo.h>
-#include "RunningAverage.h"
 
 #define CALIBRATION_SIZE 5
 #define CALIBRATION_DEFAULT 999

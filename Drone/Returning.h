@@ -1,5 +1,10 @@
 #ifndef RETURNING_H
 #define RETURNING_H
+/*
+ * The StateMachine::Returning namespace should handle all logic specific to the RETURNING state
+ * There is a loop function that is expected to be run every iteration of the main loop as long
+ * as the state is RETURNING
+ */
 
 #include "Metro.h"
 #include "tracker.h"

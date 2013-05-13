@@ -1,5 +1,10 @@
 #ifndef CAPTURING_H
 #define CAPTURING_H
+/*
+ * The StateMachine::Capturing namespace should handle all logic specific to the CAPTURING state
+ * There is a loop function that is expected to be run every iteration of the main loop as long
+ * as the state is CAPTURING
+ */
 
 #include <Metro.h>
 #include "MotorDriver.h"

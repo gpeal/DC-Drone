@@ -4,7 +4,9 @@
 #include <MemoryFree.h>
 #include <NewPing.h>
 #include <Servo.h>
+#include <SoftwareSerial.h>
 #include <QueueList.h>
+#include <XBee.h>
 #include "Attacking.h"
 #include "Capturing.h"
 #include "Communication.h"

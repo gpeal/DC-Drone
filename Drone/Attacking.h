@@ -1,5 +1,10 @@
 #ifndef ATTACK_H
 #define ATTACK_H
+/*
+ * The StateMachine::Attack namespace should handle all logic specific to the ATTACKING state
+ * There is a loop function that is expected to be run every iteration of the main loop as long
+ * as the state is ATTACKING
+ */
 
 #include "MotorDriver.h"
 #include "Tracker.h"

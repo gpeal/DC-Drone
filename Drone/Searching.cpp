@@ -2,6 +2,11 @@
 #include "Searching.h"
 #include "StateMachine.h"
 #include "Utils.h"
+/*
+ * The StateMachine::Searching namespace should handle all logic specific to the SEARCHING state
+ * There is a loop function that is expected to be run every iteration of the main loop as long
+ * as the state is SEARCHING
+ */
 
 Metro *StateMachine::Searching::search_timer = new Metro(10, 1);
 int StateMachine::Searching::search_count = 0;
