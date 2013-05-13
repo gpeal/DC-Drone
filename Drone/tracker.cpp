@@ -15,6 +15,7 @@
 
 Tracker::Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right)
 {
+  debug->log("Beginning of Tracker(i,i,i)");
   left_sensor = new Sensor(transistor_pin_left);
   middle_sensor = new Sensor(transistor_pin_middle);
   right_sensor = new Sensor(transistor_pin_right);
@@ -23,7 +24,9 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_middle, int transis
   middle_sensor->calibrate();
   right_sensor->calibrate();
 
+  debug->log("Before init of Tracker(i,i,i)");
   init();
+  debug->log("End of Tracker(i,i,i)");
 }
 
 Tracker::Tracker(int transistor_pin_left, int transistor_pin_right)
@@ -41,7 +44,7 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_right)
 void Tracker::init(void)
 {
   state = TRACKER_STATE_NONE;
-  motor_driver = MotorDriver::get_instance();
+  debug->log("Setting execute timer");
   execute_timer = new Metro(20);
 }
 

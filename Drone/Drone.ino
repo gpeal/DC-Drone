@@ -19,7 +19,6 @@
 
 int DRONE_ID;
 
-Tracker *tracker;
 Metro *free_memory_timer;
 Comm *queen;
 MotorDriver *motor_driver;
@@ -31,31 +30,33 @@ MotorDriver *MotorDriver::instance;
 
 Message_t *message;
 // initialize the static int Sensor::laser_pin
-int Sensor::laser_pin = -1;
+int Sensor::laser_pin;
 
 void setup()
 {
+  Sensor::set_laser_pin(19);
+  Sensor::toggle_laser();
   DRONE_ID = EEPROM.read(DRONE_ID_EEPROM);
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::RETURNING);
+  StateMachine::enter(StateMachine::SEARCHING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
+  pinMode(A5, OUTPUT);
 
   MotorDriver::left_motor = new Motor(3, 12);
   MotorDriver::right_motor = new Motor(11, 13);
   motor_driver = MotorDriver::get_instance();
 
-  queen = new Comm(6, 7);
+  // queen = new Comm(6, 7);
 
-  Sensor::set_laser_pin(19);
-  tracker = new Tracker(0, 1, 4);
+
+  set_state_objects();
 
 
   free_memory_timer = new Metro(10000);
@@ -67,20 +68,19 @@ void setup()
  */
 void set_state_objects(void)
 {
+  Tracker *tracker = new Tracker(0, 1, 4);
   StateMachine::Searching::motor_driver = motor_driver;
   StateMachine::Searching::tracker = tracker;
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
   // use the prey lasers until we get the top lasers
-  StateMachine::Returning::tracker = new Tracker(0, 4);
-  StateMachine::Returning::motor_driver = motor_driver;
+  // StateMachine::Returning::tracker = new Tracker(0, 1);
+  // StateMachine::Returning::motor_driver = motor_driver;
 }
 
 void loop()
 {
-  long left_encoder_value, right_encoder_value;
-  message = queen->loop();
-
+  // message = queen->loop();
   if (message != NULL)
   {
     delegate_message(message);

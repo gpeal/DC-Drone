@@ -1,5 +1,8 @@
+#include "Attacking.h"
 #include "Motor.h"
 #include "Returning.h"
+#include "StateMachine.h"
+#include "Utils.h"
 
 int StateMachine::Returning::hit_count = 0;
 int StateMachine::Returning::miss_count = 0;
@@ -8,6 +11,7 @@ int StateMachine::Returning::last_non_none_state = TRACKER_STATE_LEFT;
 Tracker *StateMachine::Returning::tracker;
 MotorDriver *StateMachine::Returning::motor_driver;
 int StateMachine::Returning::search_count = 0;
+Metro *StateMachine::Returning::search_timer = new Metro(10, 1);
 
 /**
  * This is automatically called when the state is entered
@@ -29,10 +33,10 @@ void StateMachine::Returning::loop(void)
 
   switch (state)
   {
-    case RETURNING_STATE_SEARCHING
+    case RETURNING_STATE_SEARCHING:
       if (tracker->state == TRACKER_STATE_NONE)
       {
-        spin();
+        search();
       }
       else
       {
@@ -56,7 +60,7 @@ void StateMachine::Returning::loop(void)
 /**
  * Spin in the direction of the last hit to try to find the nest again
  */
-void StateMachine::Attacking::search()
+void StateMachine::Returning::search()
 {
   int min_ticks = 4;
   int max_ticks = 30;
@@ -90,7 +94,7 @@ void StateMachine::Attacking::search()
 /*
  * spin to avoid the retroreflective tape that isn't the nest
  */
-void StateMachine::Attacking::skip(void)
+void StateMachine::Returning::skip(void)
 {
   motor_driver->set(255, -255);
   if (millis() - skipping_millis > 2000)
@@ -99,7 +103,7 @@ void StateMachine::Attacking::skip(void)
   }
 }
 
-void StateMachine::Attacking::measure(void)
+void StateMachine::Returning::measure(void)
 {
   if (tracker->state == TRACKER_STATE_NONE)
   {
@@ -115,7 +119,7 @@ void StateMachine::Attacking::measure(void)
   {
     // less than 80% of the time it was hitting the tape
     // that means it was probably moving
-    if ((float)hit_count / (float(miss_count + hit_count) < 0.8)
+    if ((float)hit_count / (float)(miss_count + hit_count) < 0.8)
     {
       state = RETURNING_STATE_RETURNING;
     }
@@ -124,7 +128,7 @@ void StateMachine::Attacking::measure(void)
     {
       skipping_millis = millis();
       // set this so the drone continues in the same direction after it finishes skipping
-      last_non_none_state = TRACKER_STATE_LEFT
+      last_non_none_state = TRACKER_STATE_LEFT;
       state = RETURNING_STATE_SKIPPING;
     }
     miss_count = 0;
@@ -132,7 +136,7 @@ void StateMachine::Attacking::measure(void)
   }
 }
 
-void StateMachine::Attacking::drive(void)
+void StateMachine::Returning::drive(void)
 {
   switch (tracker->state)
   {

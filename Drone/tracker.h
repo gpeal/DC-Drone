@@ -19,13 +19,11 @@
 class Tracker
 {
   public:
-    int state;
-
-    Tracker();
-    void loop(void);
     Tracker(int transistor_pin_left, int transistor_pin_middle, int transistor_pin_right);
     Tracker(int transistor_pin_left, int transistor_pin_right);
+    void loop(void);
     void init(void);
+    int state;
     Sensor *left_sensor;
     Sensor *right_sensor;
     Sensor *middle_sensor;
@@ -34,7 +32,6 @@ class Tracker
     void search(void);
     int last_delta;
     Metro *execute_timer;
-    MotorDriver *motor_driver;
 };
 
 #endif

@@ -5,10 +5,12 @@
 Sensor::Sensor(int transistor_pin)
   :transistor_pin(transistor_pin)
 {
+  debug->log("Initializing Tracker");
   last_reading = 0;
   last_found_millis = -1;
   consecutive_hit_count = 0;
-  debug->log("Initializing Tracker");
+  // set this really high so it doesn't fire a hit during calibration
+  delta_threshold = 9999;
 }
 
 /**
@@ -79,7 +81,6 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  // TODO fix this
   return consecutive_hit_count > 3;
 }
 

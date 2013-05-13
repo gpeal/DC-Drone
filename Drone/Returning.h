@@ -1,6 +1,7 @@
 #ifndef RETURNING_H
 #define RETURNING_H
 
+#include "Metro.h"
 #include "tracker.h"
 
 // no retroreflective tape found
@@ -28,6 +29,7 @@ namespace StateMachine
     extern int miss_count;
     extern int state;
     extern int last_non_none_state;
+    extern Metro *search_timer;
     extern int search_count;
     // the time the drone started rotating to avoid the retroreflective tape that it
     // found that isn't the nest
