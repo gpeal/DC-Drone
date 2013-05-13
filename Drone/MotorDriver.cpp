@@ -1,6 +1,10 @@
 #include "Debug.h"
 #include "MotorDriver.h"
 
+Motor *MotorDriver::left_motor;
+Motor *MotorDriver::right_motor;
+MotorDriver *MotorDriver::instance;
+
 MotorDriver::MotorDriver()
 {
   timer = new Metro(200);

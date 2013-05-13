@@ -26,11 +26,6 @@ int DRONE_ID;
 
 Metro *free_memory_timer;
 Comm *queen;
-MotorDriver *motor_driver;
-// initialize static vars
-Motor *MotorDriver::left_motor;
-Motor *MotorDriver::right_motor;
-MotorDriver *MotorDriver::instance;
 
 
 Message_t *message;
@@ -53,9 +48,6 @@ void setup()
   pinMode(A5, OUTPUT);
   Sensor::set_laser_pin(19);
 
-  MotorDriver::left_motor = new Motor(3, 12);
-  MotorDriver::right_motor = new Motor(11, 13);
-  motor_driver = MotorDriver::get_instance();
 
   // queen = new Comm(6, 7);
 
@@ -70,6 +62,9 @@ void setup()
  */
 void set_state_objects(void)
 {
+  MotorDriver::left_motor = new Motor(3, 12);
+  MotorDriver::right_motor = new Motor(11, 13);
+  MotorDriver *motor_driver = MotorDriver::get_instance();
   Tracker *tracker = new Tracker(0, 1, 4);
   StateMachine::Searching::motor_driver = motor_driver;
   StateMachine::Searching::tracker = tracker;
@@ -77,7 +72,7 @@ void set_state_objects(void)
   StateMachine::Attacking::tracker = tracker;
   Sonar::prey_sonar = new NewPing(5, 4, 200);
   // use the prey lasers until we get the top lasers
-  // StateMachine::Returning::tracker = new Tracker(0, 1);
+  // StateMachine::Returning::tracker = new Tracker(2, 3);
   StateMachine::Returning::motor_driver = motor_driver;
 }
 
