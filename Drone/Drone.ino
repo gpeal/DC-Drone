@@ -2,9 +2,11 @@
 #include <Encoder.h>
 #include <Metro.h>
 #include <MemoryFree.h>
+#include <NewPing.h>
 #include <Servo.h>
 #include <QueueList.h>
 #include "Attacking.h"
+#include "Capturing.h"
 #include "Communication.h"
 #include "Debug.h"
 #include "Drone.h"
@@ -13,6 +15,7 @@
 #include "Returning.h"
 #include "Searching.h"
 #include "Sensor.h"
+#include "Sonar.h"
 #include "StateMachine.h"
 #include "Tracker.h"
 #include "Utils.h"
@@ -38,7 +41,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::RETURNING);
+  StateMachine::enter(StateMachine::SEARCHING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -54,9 +57,7 @@ void setup()
 
   // queen = new Comm(6, 7);
 
-
   set_state_objects();
-
 
   free_memory_timer = new Metro(10000);
   // debug->log("Battery Voltage: %d", (int)readVcc());
@@ -67,23 +68,26 @@ void setup()
  */
 void set_state_objects(void)
 {
-  // Tracker *tracker = new Tracker(0, 1, 4);
+  Tracker *tracker = new Tracker(0, 1, 4);
   StateMachine::Searching::motor_driver = motor_driver;
-  // StateMachine::Searching::tracker = tracker;
+  StateMachine::Searching::tracker = tracker;
   StateMachine::Attacking::motor_driver = motor_driver;
-  // StateMachine::Attacking::tracker = tracker;
+  StateMachine::Attacking::tracker = tracker;
+  Sonar::prey_sonar = new NewPing(5, 4, 200);
   // use the prey lasers until we get the top lasers
-  StateMachine::Returning::tracker = new Tracker(0, 1);
+  // StateMachine::Returning::tracker = new Tracker(0, 1);
   StateMachine::Returning::motor_driver = motor_driver;
 }
 
 void loop()
 {
   // message = queen->loop();
-  if (message != NULL)
-  {
-    delegate_message(message);
-  }
+  // if (message != NULL)
+  // {
+  //   delegate_message(message);
+  // }
+
+  Sonar::loop();
 
   switch(StateMachine::state())
   {
@@ -96,6 +100,9 @@ void loop()
     case StateMachine::RETURNING:
       StateMachine::Returning::loop();
       return;
+    case StateMachine::CAPTURING:
+      StateMachine::Capturing::loop();
+      break;
   }
 
   free_memory_check();

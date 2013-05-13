@@ -84,7 +84,6 @@ void StateMachine::Returning::search()
     {
       // the left laser hit in the last non none state
       // turn left
-      debug->log("LNNN: %d", last_non_none_state);
       if (last_non_none_state >> 2 == 1)
       {
         motor_driver->set(-255, 255);
