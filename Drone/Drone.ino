@@ -38,7 +38,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::SEARCHING);
+  StateMachine::enter(StateMachine::IDLE);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);

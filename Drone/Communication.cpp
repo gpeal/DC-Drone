@@ -134,7 +134,8 @@ void Comm::send(int type, char *msg)
   {
     payload[i] = (uint8_t)buffer[i];
   }
+  payload[strlen(buffer)] = '\0';
   xbee_request = Tx16Request(QUEEN_ID, payload, sizeof(payload));
-  // debug->log("Sending");
+  debug->log("Sending (%d) %s", sizeof(payload), payload);
   xbee.send(xbee_request);
 }
