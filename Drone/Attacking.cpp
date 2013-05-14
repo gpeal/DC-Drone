@@ -39,6 +39,6 @@ void StateMachine::Attacking::loop(void)
   // if middle laser hit and distance < 1.6 in
   if (tracker->state >> 1 & 1 == 1 && Sonar::prey_inches < 1.6)
   {
-    enter(StateMachine::CAPTURING);
+    // enter(StateMachine::CAPTURING);
   }
 }

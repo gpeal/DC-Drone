@@ -7,9 +7,9 @@ namespace StateMachine
     IDLE = 0,
     DEPLOYING,
     SEARCHING,
-    TRACKING,
+    RELOCATING,
     ATTACKING,
-    CAPTURING,
+    SEARCHING_NEST,
     RETURNING,
     DELIVERING,
     DISCONNECTED
@@ -17,6 +17,7 @@ namespace StateMachine
   void enter(state_t state);
   state_t state(void);
   extern state_t _state;
+  extern state_t _previous_state;
   extern long enter_millis;
 };
 

@@ -3,6 +3,7 @@
 #include "StateMachine.h"
 
 StateMachine::state_t StateMachine::_state;
+StateMachine::state_t StateMachine::_previous_state;
 long StateMachine::enter_millis = millis();
 /**
  * StateMachine::enter takes a state_t and set the state to that
@@ -13,6 +14,7 @@ long StateMachine::enter_millis = millis();
  */
 void StateMachine::enter(state_t new_state)
 {
+  _previous_state = _state;
   _state = new_state;
   enter_millis = millis();
   switch(_state)

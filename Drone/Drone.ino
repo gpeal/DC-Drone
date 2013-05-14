@@ -49,7 +49,7 @@ void setup()
   Sensor::set_laser_pin(19);
 
 
-  // queen = new Comm(6, 7);
+  queen = new Comm(6, 7);
 
   set_state_objects();
 
@@ -78,11 +78,11 @@ void set_state_objects(void)
 
 void loop()
 {
-  // message = queen->loop();
-  // if (message != NULL)
-  // {
-  //   delegate_message(message);
-  // }
+  message = queen->loop();
+  if (message != NULL)
+  {
+    delegate_message(message);
+  }
 
   Sonar::loop();
 
@@ -97,9 +97,6 @@ void loop()
     case StateMachine::RETURNING:
       StateMachine::Returning::loop();
       return;
-    case StateMachine::CAPTURING:
-      StateMachine::Capturing::loop();
-      break;
   }
 
   free_memory_check();
@@ -114,14 +111,6 @@ void free_memory_check(void)
       debug->log("Free Memory: %d", freeMemory());
     }
   }
-}
-
-void send_heartbeat(void)
-{
-  message->type = MT_HEARTBEAT;
-  sprintf(message->payload, "%d,%d", StateMachine::state(), freeMemory());
-  debug->log("Sent heartbeat");
-  queen->send(message);
 }
 
 /**
@@ -159,6 +148,56 @@ void delegate_message(Message_t *message)
   delete message;
 }
 
-void attack(void)
+void send_heartbeat(void)
 {
+  int type;
+  char msg[MAX_PAYLOAD_LENGTH];
+  switch(StateMachine::state())
+  {
+    case StateMachine::IDLE:
+      type = MT_HEARTBEAT_RESPONSE_IDLE;
+      sprintf(msg, "");
+      break;
+    case StateMachine::DEPLOYING:
+      type = MT_HEARTBEAT_RESPONSE_DEPLOYING;
+      // vars: duration, complete
+      sprintf(msg, "");
+      break;
+    case StateMachine::SEARCHING:
+      type = MT_HEARTBEAT_RESPONSE_SEARCHING;
+      // vars: duration, tracking
+      sprintf(msg, "");
+      break;
+    case StateMachine::RELOCATING:
+      type = MT_HEARTBEAT_RESPONSE_RELOCATING;
+      // vars:duration,
+      sprintf(msg, "");
+      break;
+    case StateMachine::ATTACKING:
+      type = MT_HEARTBEAT_RESPONSE_ATTACKING;
+      // duration, distance, tracker state, captured
+      sprintf(msg, "");
+      break;
+    case StateMachine::SEARCHING_NEST:
+      type = MT_HEARTBEAT_RESPONSE_SEARCHING_NEST;
+      sprintf(msg, "");
+      // duration, tracking
+      break;
+    case StateMachine::RETURNING:
+      type = MT_HEARTBEAT_RESPONSE_RETURNING;
+      sprintf(msg, "");
+      // duration, tracking, complete
+      break;
+    case StateMachine::DELIVERING:
+      type = MT_HEARTBEAT_RESPONSE_DELIVERING;
+      sprintf(msg, "");
+      break;
+    case StateMachine::DISCONNECTED:
+      type = MT_HEARTBEAT_RESPONSE_DISCONNECTED;
+      // duration
+      sprintf(msg, "");
+      break;
+  }
+  queen->send(type, msg);
+  debug->log("Sent heartbeat");
 }

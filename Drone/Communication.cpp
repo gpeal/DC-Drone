@@ -98,6 +98,7 @@ Message_t *Comm::parse_message(char *input)
   int num_matched;
   sprintf(formatter, "%%d%c%%d%c%%d%c%%s%c", DELIMITER, DELIMITER, DELIMITER, END_DELIMITER);
   num_matched = sscanf(input, formatter, &(message->to), &(message->from), &(message->type), message->payload);
+  // debug->log("Parsing %s with %s and got %d", input, formatter, num_matched);
   // if the payload is DUMMY_PAYLOAD it was just added to make the string parsing easier
   // remove it now so it doesn't actually get seen by the user
   if (strcmp(message->payload, DUMMY_PAYLOAD) == 0)
@@ -123,17 +124,17 @@ Message_t *Comm::parse_message(char *input)
  *
  * @param message the message to be sent
  */
-void Comm::send(Message_t *message)
+void Comm::send(int type, char *msg)
 {
+  // TODO merge buffer and payload
   char buffer[MAX_MESSAGE_LENGTH];
   uint8_t payload[MAX_MESSAGE_LENGTH];
-  int ret;
-  sprintf(buffer, "%d%c%d%c%d%c%s%c", message->to, DELIMITER, message->from, DELIMITER, message->type, DELIMITER, message->payload, END_DELIMITER);
+  sprintf(buffer, "%d%c%d%c%d%c%s%c", QUEEN_ID, DELIMITER, DRONE_ID, DELIMITER, type, DELIMITER, msg, END_DELIMITER);
   for(int i = 0; i < strlen(buffer); i++)
   {
     payload[i] = (uint8_t)buffer[i];
   }
   xbee_request = Tx16Request(QUEEN_ID, payload, sizeof(payload));
-  debug->log("Sending");
+  // debug->log("Sending");
   xbee.send(xbee_request);
 }

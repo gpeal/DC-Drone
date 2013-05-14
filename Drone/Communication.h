@@ -19,7 +19,17 @@
 
 // message types
 #define MT_INITIALIZE 0
+#define MT_INITIALIZE_RESPONSE 1
 #define MT_HEARTBEAT 1
+#define MT_HEARTBEAT_RESPONSE_IDLE 3
+#define MT_HEARTBEAT_RESPONSE_DEPLOYING 4
+#define MT_HEARTBEAT_RESPONSE_SEARCHING 5
+#define MT_HEARTBEAT_RESPONSE_RELOCATING 6
+#define MT_HEARTBEAT_RESPONSE_ATTACKING 7
+#define MT_HEARTBEAT_RESPONSE_SEARCHING_NEST 8
+#define MT_HEARTBEAT_RESPONSE_RETURNING 9
+#define MT_HEARTBEAT_RESPONSE_DELIVERING 10
+#define MT_HEARTBEAT_RESPONSE_DISCONNECTED 11
 
 
 //TODO: make this a class with inheritance
@@ -37,7 +47,7 @@ public:
   Comm(int rx, int tx);
   void setup(int rx, int tx);
   Message_t *loop(void);
-  void send(Message_t *message);
+  void send(int type, char *msg);
 private:
   SoftwareSerial *comm;
   XBee xbee;
