@@ -29,9 +29,9 @@ void StateMachine::enter(state_t new_state)
     case DEPLOYING:
       Deploying::enter();
       break;
-    case SEARCHING:
-      Searching::enter();
-      break;
+    // case SEARCHING:
+    //   Searching::enter();
+    //   break;
     case RETURNING:
       Returning::enter();
       break;

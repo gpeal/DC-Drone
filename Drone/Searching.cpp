@@ -8,100 +8,85 @@
  * as the state is SEARCHING
  */
 
-Metro *StateMachine::Searching::search_timer = new Metro(10, 1);
-long StateMachine::Searching::spin_micros;
-int StateMachine::Searching::spin_count = 0;
-int StateMachine::Searching::spin_state = 0;
-int StateMachine::Searching::track_count = 0;
 MotorDriver *StateMachine::Searching::motor_driver;
 Tracker *StateMachine::Searching::tracker;
-int StateMachine::Searching::last_non_none_state = TRACKER_STATE_LEFT;
+int StateMachine::Searching::last_non_none_state = TRACKER_STATE_NONE;
+
 
 void StateMachine::Searching::enter(void)
 {
-  spin_micros = micros();
 }
+
 
 void StateMachine::Searching::loop(void)
 {
+  int min_duty;
+  int max_duty;
+  int ramp_up_time;
+  int duty;
+
   tracker->loop();
-  if (tracker->state == TRACKER_STATE_NONE)
+  if (tracker->state != TRACKER_STATE_NONE)
   {
-    spin();
-  }
-  else
-  {
-    spin();
-    // track();
-  }
-}
-
-void StateMachine::Searching::track(void)
-{
-  int ticks_to_skip = 4;
-  // if the middle laser hits, move slower
-  if (tracker->state >> 1 & 1 == 1)
-  {
-    ticks_to_skip *= 2;
+    last_non_none_state = tracker->state;
   }
 
-  if (search_timer->check())
+  // the tracker has hit something before, just track it
+  if (last_non_none_state != TRACKER_STATE_NONE)
   {
-    track_count++;
-    if (track_count % ticks_to_skip == 0)
+    switch(tracker->state)
     {
-      // right laser hit
-      if (tracker->state & 1 == 1)
-      {
-        motor_driver->set(255, -255);
-      }
-      // left laser hit
-      else if (tracker->state >> 2 & 1 == 1)
-      {
-        motor_driver->set(-255, 255);
-      }
-    }
-    else
-    {
-      motor_driver->set(0, 0);
+      case TRACKER_STATE_LEFT:
+        spin(80, LEFT);
+        break;
+      case TRACKER_STATE_LEFT_MIDDLE:
+        spin(10, LEFT);
+        break;
+      case TRACKER_STATE_MIDDLE_RIGHT:
+        spin(10, RIGHT);
+        break;
+      case TRACKER_STATE_RIGHT:
+        spin(80, RIGHT);
+        break;
+      case TRACKER_STATE_NONE:
+        // the right laser hit in the last non none state
+        if (last_non_none_state & 1 == 1)
+        {
+          spin(30, RIGHT);
+        }
+        else
+        {
+          spin(30, LEFT);
+        }
+        break;
     }
   }
-  spin_micros = micros();
+  else
+  {
+    min_duty = 1;
+    max_duty = 10;
+    ramp_up_time = 5;
+    duty =  (float)(millis() - enter_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
+    duty = cap(duty, min_duty, max_duty);
+    spin(duty, RIGHT);
+  }
+
+
+
 }
 
-void StateMachine::Searching::spin(void)
+/**
+ * Turn the motors on for duty millis every 100 millis
+ * Direction takes RIGHT or LEFT
+ */
+void StateMachine::Searching::spin(int duty, int direction)
 {
-  int direction;
-  int min_ticks = 10000;
-  int max_ticks = 30000;
-  int ramp_up_time = 5;
-  int ticks_to_skip; // =  (float)(millis() - spin_micros) / 1000.0 * -(float)(max_ticks - min_ticks) / (float)ramp_up_time + max_ticks;
-  // ticks_to_skip = cap(ticks_to_skip, min_ticks, max_ticks)
-  if (millis() - spin_micros < ramp_up_time * 1000000)
+  if ((millis() - enter_millis) % 100 < duty)
   {
-    ticks_to_skip = max_ticks;
+    motor_driver->set(direction * 255,  -direction * 255);
   }
   else
   {
-    ticks_to_skip = min_ticks;
-  }
-
-  // if the right laser hit in the last non none state, turn right
-  if (last_non_none_state & 1 == 1)
-  {
-    direction = 1;
-  }
-  else
-  {
-    direction = -1;
-  }
-  if (micros() - spin_micros > ticks_to_skip)
-  {
-    spin_state = !spin_state;
-    spin_micros = micros();
-  }
-  else
-  {
-    motor_driver->set(255 * direction * spin_state, 255 * -direction * spin_state);
+    motor_driver->set(0, 0);
   }
 }

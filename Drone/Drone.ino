@@ -39,7 +39,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::IDLE);
+  StateMachine::enter(StateMachine::SEARCHING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -76,7 +76,7 @@ void set_state_objects(void)
 
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
-  Sonar::prey_sonar = new NewPing(5, 4, 200);
+  Sonar::prey_sonar = new NewPing(5, 4, 50);
   // use the prey lasers until we get the top lasers
   // StateMachine::Returning::tracker = new Tracker(2, 3);
   StateMachine::Returning::motor_driver = motor_driver;
@@ -89,8 +89,6 @@ void loop()
   {
     delegate_message(message);
   }
-
-  Sonar::loop();
 
   switch(StateMachine::state())
   {

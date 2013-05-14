@@ -1,6 +1,9 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
+#define RIGHT 1
+#define LEFT -1
+
 #include "MotorDriver.h"
 #include "Tracker.h"
 
@@ -10,15 +13,9 @@ namespace StateMachine
   {
     void enter(void);
     void loop(void);
-    void track(void);
-    void spin(void);
+    void spin(int duty, int direction);
     extern MotorDriver *motor_driver;
-    extern Metro *search_timer;
     extern Tracker *tracker;
-    extern int spin_count;
-    extern int spin_state;
-    extern long spin_micros;
-    extern int track_count;
     extern int last_non_none_state;
   }
 }
