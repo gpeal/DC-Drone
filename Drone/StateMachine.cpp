@@ -1,5 +1,7 @@
 #include "Arduino.h"
+#include "Deploying.h"
 #include "Returning.h"
+#include "Searching.h"
 #include "StateMachine.h"
 
 StateMachine::state_t StateMachine::_state;
@@ -15,10 +17,21 @@ long StateMachine::enter_millis = millis();
 void StateMachine::enter(state_t new_state)
 {
   _previous_state = _state;
+  //call leave functions
+  switch(_previous_state)
+  {
+  }
+
   _state = new_state;
   enter_millis = millis();
   switch(_state)
   {
+    case DEPLOYING:
+      Deploying::enter();
+      break;
+    case SEARCHING:
+      Searching::enter();
+      break;
     case RETURNING:
       Returning::enter();
       break;

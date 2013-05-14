@@ -11,6 +11,7 @@
 #include "Capturing.h"
 #include "Communication.h"
 #include "Debug.h"
+#include "Deploying.h"
 #include "Drone.h"
 #include "Motor.h"
 #include "MotorDriver.h"
@@ -65,9 +66,14 @@ void set_state_objects(void)
   MotorDriver::left_motor = new Motor(3, 12);
   MotorDriver::right_motor = new Motor(11, 13);
   MotorDriver *motor_driver = MotorDriver::get_instance();
+
   Tracker *tracker = new Tracker(0, 1, 4);
+
+  StateMachine::Deploying::motor_driver = motor_driver;
+
   StateMachine::Searching::motor_driver = motor_driver;
   StateMachine::Searching::tracker = tracker;
+
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
   Sonar::prey_sonar = new NewPing(5, 4, 200);
@@ -88,6 +94,9 @@ void loop()
 
   switch(StateMachine::state())
   {
+    case StateMachine::DEPLOYING:
+      StateMachine::Deploying::loop();
+      break;
     case StateMachine::SEARCHING:
       StateMachine::Searching::loop();
       break;
@@ -132,9 +141,7 @@ void delegate_message(Message_t *message)
   switch(message->type)
   {
     case MT_INITIALIZE:
-      debug->log("Initialize Received (%s)", message->payload);
       sprintf(formatter, "%%[^%c]%c%%d%c%%[^%c]%c%%c", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
-      debug->log("Formatter: %s", formatter);
       num_matched = sscanf(message->payload, formatter, str1, &int1, str2, &char1);
       float1 = atof(str2);
       debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
@@ -144,24 +151,32 @@ void delegate_message(Message_t *message)
       debug->log("Heartbeat Received");
       send_heartbeat();
       break;
+    case MT_SWITCH_STATE:
+      sscanf(message->payload, "%d", &int1);
+      debug->log("Switching to %d", int1);
+      StateMachine::enter((StateMachine::state_t)int1);
+      break;
   }
   delete message;
 }
 
 void send_heartbeat(void)
 {
-  int type;
+  int type, seconds;
   char msg[MAX_PAYLOAD_LENGTH];
+  seconds = (int)((float)(millis() - StateMachine::enter_millis) / 1000.0);
   switch(StateMachine::state())
   {
     case StateMachine::IDLE:
       type = MT_HEARTBEAT_RESPONSE_IDLE;
-      sprintf(msg, "%d", (int)(millis() - StateMachine::enter_millis));
+      sprintf(msg, "%d", seconds);
       break;
     case StateMachine::DEPLOYING:
       type = MT_HEARTBEAT_RESPONSE_DEPLOYING;
       // vars: duration, complete
-      sprintf(msg, "");
+      sprintf(msg, "%d%c%d", seconds,
+        PAYLOAD_DELIMITER,
+        (int)StateMachine::Deploying::complete);
       break;
     case StateMachine::SEARCHING:
       type = MT_HEARTBEAT_RESPONSE_SEARCHING;

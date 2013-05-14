@@ -128,14 +128,8 @@ void Comm::send(int type, char *msg)
 {
   // TODO merge buffer and payload
   char buffer[MAX_MESSAGE_LENGTH];
-  uint8_t payload[MAX_MESSAGE_LENGTH];
   sprintf(buffer, "%d%c%d%c%d%c%s%c", QUEEN_ID, DELIMITER, DRONE_ID, DELIMITER, type, DELIMITER, msg, END_DELIMITER);
-  for(int i = 0; i < strlen(buffer); i++)
-  {
-    payload[i] = (uint8_t)buffer[i];
-  }
-  payload[strlen(buffer)] = '\0';
-  xbee_request = Tx16Request(QUEEN_ID, payload, sizeof(payload));
-  debug->log("Sending (%d) %s", sizeof(payload), payload);
+  debug->log("Sending (%d) %s", strlen(buffer), buffer);
+  xbee_request = Tx16Request(QUEEN_ID, (uint8_t *)buffer, strlen(buffer));
   xbee.send(xbee_request);
 }
