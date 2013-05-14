@@ -138,7 +138,7 @@ void delegate_message(Message_t *message)
       num_matched = sscanf(message->payload, formatter, str1, &int1, str2, &char1);
       float1 = atof(str2);
       debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
-      send_heartbeat();
+      queen->send(MT_INITIALIZE_RESPONSE, "");
       break;
     case MT_HEARTBEAT:
       debug->log("Heartbeat Received");
@@ -156,7 +156,7 @@ void send_heartbeat(void)
   {
     case StateMachine::IDLE:
       type = MT_HEARTBEAT_RESPONSE_IDLE;
-      sprintf(msg, "");
+      sprintf(msg, "%d", (int)(millis() - StateMachine::enter_millis));
       break;
     case StateMachine::DEPLOYING:
       type = MT_HEARTBEAT_RESPONSE_DEPLOYING;
