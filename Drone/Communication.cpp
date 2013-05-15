@@ -119,22 +119,12 @@ void Comm::parse_message(char *input)
  *
  * @param message the message to be sent
  */
-void Comm::send(int type, char *msg)
+void Comm::send(int type, char msg[])
 {
   memset(xbee_message, 0, MAX_MESSAGE_LENGTH);
   sprintf(xbee_message, "%d%c%d%c%d%c%s%c", QUEEN_ID, DELIMITER, DRONE_ID, DELIMITER, type, DELIMITER, msg, END_DELIMITER);
   // debug->log("Sending (%d) %s", strlen(xbee_message), xbee_message);
   xbee_request = Tx16Request(QUEEN_ID, (uint8_t *)xbee_message, strlen(xbee_message));
   xbee.send(xbee_request);
-  Serial.print("Frame ");
-  Serial.print(xbee_request.getFrameId());
-  Serial.print(",");
-  Serial.print(xbee_request.getApiId());
-  Serial.print(": ");
-  for(int i = 0; i < xbee_request.getFrameDataLength(); i++)
-  {
-    Serial.print((char)xbee_request.getFrameData(i));
-  }
-
-  Serial.println();
+  debug->log("Sent (%d): %s", 1, xbee_message);
 }
