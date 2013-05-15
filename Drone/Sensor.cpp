@@ -22,7 +22,7 @@ void Sensor::calibrate()
 {
   int delta_sum = 0;
   make_reading();
-  for(int i = 0; i < 20; i++)
+  for(int i = 0; i < 50; i++)
   {
     toggle_laser();
     make_reading();
@@ -30,7 +30,7 @@ void Sensor::calibrate()
     delay(10);
   }
 
-  delta_threshold = (int)(8 * (float)delta_sum / 20);
+  delta_threshold = (int)(1.8 * (float)delta_sum / 20);
 
   debug->log("Delta threshold: %d", delta_threshold);
 }

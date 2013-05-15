@@ -26,6 +26,7 @@ void StateMachine::Searching::loop(void)
   int duty;
 
   tracker->loop();
+
   if (tracker->state != TRACKER_STATE_NONE)
   {
     last_non_none_state = tracker->state;
@@ -37,7 +38,7 @@ void StateMachine::Searching::loop(void)
     switch(tracker->state)
     {
       case TRACKER_STATE_LEFT:
-        spin(80, LEFT);
+        spin(15, LEFT);
         break;
       case TRACKER_STATE_LEFT_MIDDLE:
         spin(10, LEFT);
@@ -46,25 +47,28 @@ void StateMachine::Searching::loop(void)
         spin(10, RIGHT);
         break;
       case TRACKER_STATE_RIGHT:
-        spin(80, RIGHT);
+        spin(15, RIGHT);
         break;
       case TRACKER_STATE_NONE:
         // the right laser hit in the last non none state
         if (last_non_none_state & 1 == 1)
         {
-          spin(30, RIGHT);
+          spin(15, RIGHT);
         }
         else
         {
-          spin(30, LEFT);
+          spin(15, LEFT);
         }
+        break;
+      default:
+        motor_driver->set(0, 0);
         break;
     }
   }
   else
   {
     min_duty = 1;
-    max_duty = 10;
+    max_duty = 6;
     ramp_up_time = 5;
     duty =  (float)(millis() - enter_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
     duty = cap(duty, min_duty, max_duty);
