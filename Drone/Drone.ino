@@ -8,7 +8,6 @@
 #include <QueueList.h>
 #include <XBee.h>
 #include "Attacking.h"
-#include "Capturing.h"
 #include "Communication.h"
 #include "Debug.h"
 #include "Deploying.h"
