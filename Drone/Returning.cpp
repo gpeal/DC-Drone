@@ -1,6 +1,7 @@
 #include "Attacking.h"
 #include "Motor.h"
 #include "Returning.h"
+#include "Sonar.h"
 #include "StateMachine.h"
 #include "Utils.h"
 
@@ -31,8 +32,14 @@ void StateMachine::Returning::enter(void)
 
 void StateMachine::Returning::loop(void)
 {
-  if (!tracker->loop())
+  if (tracker->loop())
+  {
+    Sonar::loop();
+  }
+  else
+  {
     return;
+  }
 
   switch (state)
   {
