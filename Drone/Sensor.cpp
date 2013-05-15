@@ -80,7 +80,7 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  return consecutive_hit_count > 3;
+  return consecutive_hit_count >= 2;
 }
 
 void Sensor::set_laser_pin(int pin)

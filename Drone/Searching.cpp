@@ -11,6 +11,8 @@
 MotorDriver *StateMachine::Searching::motor_driver;
 Tracker *StateMachine::Searching::tracker;
 int StateMachine::Searching::last_non_none_state = TRACKER_STATE_NONE;
+const int StateMachine::Searching::LEFT = -1;
+const int StateMachine::Searching::RIGHT = 1;
 
 
 void StateMachine::Searching::enter(void)
@@ -68,7 +70,7 @@ void StateMachine::Searching::loop(void)
   else
   {
     min_duty = 1;
-    max_duty = 6;
+    max_duty = 20;
     ramp_up_time = 5;
     duty =  (float)(millis() - enter_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
     duty = cap(duty, min_duty, max_duty);

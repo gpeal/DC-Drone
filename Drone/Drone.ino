@@ -39,7 +39,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::SEARCHING);
+  StateMachine::enter(StateMachine::IDLE);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -142,11 +142,11 @@ void delegate_message(Message_t *message)
       sprintf(formatter, "%%[^%c]%c%%d%c%%[^%c]%c%%c", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
       num_matched = sscanf(message->payload, formatter, str1, &int1, str2, &char1);
       float1 = atof(str2);
-      debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
+      // debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
       queen->send(MT_INITIALIZE_RESPONSE, "");
       break;
     case MT_HEARTBEAT:
-      debug->log("Heartbeat Received");
+      // debug->log("Heartbeat Received");
       send_heartbeat();
       break;
     case MT_SWITCH_STATE:
@@ -155,11 +155,11 @@ void delegate_message(Message_t *message)
       StateMachine::enter((StateMachine::state_t)int1);
       break;
   }
-  delete message;
 }
 
 void send_heartbeat(void)
 {
+  int captured;
   int type, seconds;
   char msg[MAX_PAYLOAD_LENGTH];
   seconds = (int)((float)(millis() - StateMachine::enter_millis) / 1000.0);
@@ -179,7 +179,9 @@ void send_heartbeat(void)
     case StateMachine::SEARCHING:
       type = MT_HEARTBEAT_RESPONSE_SEARCHING;
       // vars: duration, tracking
-      sprintf(msg, "");
+      sprintf(msg, "%d%c%d", seconds,
+                             PAYLOAD_DELIMITER,
+                             StateMachine::Searching::tracker->state != TRACKER_STATE_NONE);
       break;
     case StateMachine::RELOCATING:
       type = MT_HEARTBEAT_RESPONSE_RELOCATING;
@@ -188,8 +190,13 @@ void send_heartbeat(void)
       break;
     case StateMachine::ATTACKING:
       type = MT_HEARTBEAT_RESPONSE_ATTACKING;
-      // duration, distance, tracker state, captured
-      sprintf(msg, "");
+      // duration, distance, captured
+      sprintf(msg, "%d%c%d%c%d%c", 100,
+                                   PAYLOAD_DELIMITER,
+                                   (int)(Sonar::prey_inches * 10),
+                                   PAYLOAD_DELIMITER,
+                                   StateMachine::Attacking::captured,
+                                   PAYLOAD_DELIMITER);
       break;
     case StateMachine::SEARCHING_NEST:
       type = MT_HEARTBEAT_RESPONSE_SEARCHING_NEST;
@@ -198,8 +205,13 @@ void send_heartbeat(void)
       break;
     case StateMachine::RETURNING:
       type = MT_HEARTBEAT_RESPONSE_RETURNING;
-      sprintf(msg, "");
       // duration, tracking, complete
+      sprintf(msg, "%d%c%d%c%d%c", seconds,
+                                 PAYLOAD_DELIMITER,
+                                 StateMachine::Returning::tracker->state != 0,
+                                 PAYLOAD_DELIMITER,
+                                 0,
+                                 PAYLOAD_DELIMITER);
       break;
     case StateMachine::DELIVERING:
       type = MT_HEARTBEAT_RESPONSE_DELIVERING;
@@ -212,5 +224,4 @@ void send_heartbeat(void)
       break;
   }
   queen->send(type, msg);
-  debug->log("Sent heartbeat");
 }

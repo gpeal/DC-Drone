@@ -20,6 +20,7 @@ Comm::Comm(int rx, int tx)
   xbee_response = Rx16Response();
   xbee_tx_response = TxStatusResponse();
   xbee_request = Tx16Request();
+  message = new Message_t();
 }
 
 /**
@@ -32,7 +33,6 @@ Comm::Comm(int rx, int tx)
 Message_t *Comm::loop(void)
 {
   char input_char;
-  Message_t *message;
 
   xbee.readPacket();
   if (xbee.getResponse().isAvailable() && xbee.getResponse().getApiId() == RX_16_RESPONSE)
@@ -52,11 +52,10 @@ Message_t *Comm::loop(void)
     {
       sprintf(xbee_message, "%s%s\n", xbee_message, DUMMY_PAYLOAD);
     }
-    message = parse_message(xbee_message);
+    parse_message(xbee_message);
     if (message->type == -1)
     {
       debug->logl(ERROR, "%s", message->payload);
-      delete message;
       return NULL;
     }
     return message;
@@ -66,7 +65,7 @@ Message_t *Comm::loop(void)
     // get the delivery status, the fifth byte
     if (xbee_tx_response.getStatus() == SUCCESS)
     {
-       // debug->log("TX success");
+       debug->log("TX success");
     }
     else
     {
@@ -87,11 +86,8 @@ Message_t *Comm::loop(void)
  *
  * @return Message_t the parsed message object
  */
-Message_t *Comm::parse_message(char *input)
+void Comm::parse_message(char *input)
 {
-  Message_t *message;
-  message = new Message_t;
-
   char temp[MAX_PAYLOAD_LENGTH];
   // string formatter for sscanf to decode the message
   char formatter[32];
@@ -116,7 +112,6 @@ Message_t *Comm::parse_message(char *input)
     message->type = -1;
     strcpy(message->payload, "MSG for wrong drone");
   }
-  return message;
 }
 
 /**
@@ -126,10 +121,20 @@ Message_t *Comm::parse_message(char *input)
  */
 void Comm::send(int type, char *msg)
 {
-  // TODO merge buffer and payload
-  char buffer[MAX_MESSAGE_LENGTH];
-  sprintf(buffer, "%d%c%d%c%d%c%s%c", QUEEN_ID, DELIMITER, DRONE_ID, DELIMITER, type, DELIMITER, msg, END_DELIMITER);
-  debug->log("Sending (%d) %s", strlen(buffer), buffer);
-  xbee_request = Tx16Request(QUEEN_ID, (uint8_t *)buffer, strlen(buffer));
+  memset(xbee_message, 0, MAX_MESSAGE_LENGTH);
+  sprintf(xbee_message, "%d%c%d%c%d%c%s%c", QUEEN_ID, DELIMITER, DRONE_ID, DELIMITER, type, DELIMITER, msg, END_DELIMITER);
+  // debug->log("Sending (%d) %s", strlen(xbee_message), xbee_message);
+  xbee_request = Tx16Request(QUEEN_ID, (uint8_t *)xbee_message, strlen(xbee_message));
   xbee.send(xbee_request);
+  Serial.print("Frame ");
+  Serial.print(xbee_request.getFrameId());
+  Serial.print(",");
+  Serial.print(xbee_request.getApiId());
+  Serial.print(": ");
+  for(int i = 0; i < xbee_request.getFrameDataLength(); i++)
+  {
+    Serial.print((char)xbee_request.getFrameData(i));
+  }
+
+  Serial.println();
 }
