@@ -30,7 +30,7 @@ void Sensor::calibrate()
     delay(10);
   }
 
-  delta_threshold = (int)(1.8 * (float)delta_sum / 20);
+  delta_threshold = (int)(2.5 * (float)delta_sum / 50);
 
   debug->log("Delta threshold: %d", delta_threshold);
 }
@@ -80,7 +80,7 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  return consecutive_hit_count >= 2;
+  return consecutive_hit_count >= 3;
 }
 
 void Sensor::set_laser_pin(int pin)

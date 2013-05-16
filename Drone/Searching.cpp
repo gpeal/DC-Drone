@@ -11,12 +11,15 @@
 MotorDriver *StateMachine::Searching::motor_driver;
 Tracker *StateMachine::Searching::tracker;
 int StateMachine::Searching::last_non_none_state = TRACKER_STATE_NONE;
-const int StateMachine::Searching::LEFT = -1;
+long StateMachine::Searching::last_hit_millis;
+const int StateMachine::Searching::LEFT =  -1;
 const int StateMachine::Searching::RIGHT = 1;
 
 
 void StateMachine::Searching::enter(void)
 {
+  // do this so it starts spinning slowly
+  last_hit_millis = millis();
 }
 
 
@@ -32,6 +35,7 @@ void StateMachine::Searching::loop(void)
   if (tracker->state != TRACKER_STATE_NONE)
   {
     last_non_none_state = tracker->state;
+    last_hit_millis = millis();
   }
 
   // the tracker has hit something before, just track it
@@ -72,13 +76,10 @@ void StateMachine::Searching::loop(void)
     min_duty = 1;
     max_duty = 20;
     ramp_up_time = 5;
-    duty =  (float)(millis() - enter_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
+    duty =  (float)(millis() - last_hit_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
     duty = cap(duty, min_duty, max_duty);
     spin(duty, RIGHT);
   }
-
-
-
 }
 
 /**
