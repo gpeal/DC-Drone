@@ -4,11 +4,9 @@
 #include <MemoryFree.h>
 #include <NewPing.h>
 #include <Servo.h>
-#include <SoftwareSerial.h>
 #include <QueueList.h>
 #include <XBee.h>
 #include "Attacking.h"
-#include "Communication.h"
 #include "Debug.h"
 #include "Deploying.h"
 #include "Drone.h"
@@ -25,12 +23,6 @@
 int DRONE_ID;
 
 Metro *free_memory_timer;
-Comm *queen;
-
-
-Message_t *message;
-// initialize the static int Sensor::laser_pin
-int Sensor::laser_pin;
 
 void setup()
 {
@@ -38,7 +30,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::RETURNING);
+  StateMachine::enter(StateMachine::SEARCHING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -47,9 +39,6 @@ void setup()
   pinMode(A4, INPUT);
   pinMode(A5, OUTPUT);
   Sensor::set_laser_pin(19);
-
-
-  queen = new Comm(6, 7);
 
   set_state_objects();
 
@@ -83,12 +72,6 @@ void set_state_objects(void)
 
 void loop()
 {
-  // message = queen->loop();
-  // if (message != NULL)
-  // {
-  //   delegate_message(message);
-  // }
-
   switch(StateMachine::state())
   {
     case StateMachine::DEPLOYING:
@@ -117,110 +100,4 @@ void free_memory_check(void)
       debug->log("Free Memory: %d", freeMemory());
     }
   }
-}
-
-/**
- * delegate_message takes a Message_t struct and takes action on it
- *
- * @param Message_t *message: the message to take action on
- */
-void delegate_message(Message_t *message)
-{
-  char str1[16];
-  char str2[16];
-  int int1 = 6;
-  float float1 = 6.66;
-  char char1 = '7';
-  char formatter[16];
-  int num_matched;
-  message->from = DRONE_ID;
-  message-> to = QUEEN_ID;
-  switch(message->type)
-  {
-    case MT_INITIALIZE:
-      sprintf(formatter, "%%[^%c]%c%%d%c%%[^%c]%c%%c", PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER, PAYLOAD_DELIMITER);
-      num_matched = sscanf(message->payload, formatter, str1, &int1, str2, &char1);
-      float1 = atof(str2);
-      // debug->log("Matched: %d. %s, %d, %c, %d", num_matched, str1, int1, char1, (int)(100 * float1));
-      queen->send(MT_INITIALIZE_RESPONSE, "");
-      break;
-    case MT_HEARTBEAT:
-      // debug->log("Heartbeat Received");
-      send_heartbeat();
-      break;
-    case MT_SWITCH_STATE:
-      sscanf(message->payload, "%d", &int1);
-      debug->log("Switching to %d", int1);
-      StateMachine::enter((StateMachine::state_t)int1);
-      break;
-  }
-}
-
-void send_heartbeat(void)
-{
-  int captured;
-  int type, seconds;
-  char msg[MAX_PAYLOAD_LENGTH];
-  seconds = (int)((float)(millis() - StateMachine::enter_millis) / 1000.0);
-  switch(StateMachine::state())
-  {
-    case StateMachine::IDLE:
-      type = MT_HEARTBEAT_RESPONSE_IDLE;
-      sprintf(msg, "%d", seconds);
-      break;
-    case StateMachine::DEPLOYING:
-      type = MT_HEARTBEAT_RESPONSE_DEPLOYING;
-      // vars: duration, complete
-      sprintf(msg, "%d%c%d", seconds,
-        PAYLOAD_DELIMITER,
-        (int)StateMachine::Deploying::complete);
-      break;
-    case StateMachine::SEARCHING:
-      type = MT_HEARTBEAT_RESPONSE_SEARCHING;
-      // vars: duration, tracking
-      sprintf(msg, "%d%c%d", seconds,
-                             PAYLOAD_DELIMITER,
-                             StateMachine::Searching::tracker->state != TRACKER_STATE_NONE);
-      break;
-    case StateMachine::RELOCATING:
-      type = MT_HEARTBEAT_RESPONSE_RELOCATING;
-      // vars:duration,
-      sprintf(msg, "");
-      break;
-    case StateMachine::ATTACKING:
-      type = MT_HEARTBEAT_RESPONSE_ATTACKING;
-      // duration, distance, captured
-      sprintf(msg, "%d%c%d%c%d%c", 100,
-                                   PAYLOAD_DELIMITER,
-                                   (int)(Sonar::prey_inches * 10),
-                                   PAYLOAD_DELIMITER,
-                                   StateMachine::Attacking::captured,
-                                   PAYLOAD_DELIMITER);
-      break;
-    case StateMachine::SEARCHING_NEST:
-      type = MT_HEARTBEAT_RESPONSE_SEARCHING_NEST;
-      sprintf(msg, "");
-      // duration, tracking
-      break;
-    case StateMachine::RETURNING:
-      type = MT_HEARTBEAT_RESPONSE_RETURNING;
-      // duration, tracking, complete
-      sprintf(msg, "%d%c%d%c%d%c", seconds,
-                                 PAYLOAD_DELIMITER,
-                                 StateMachine::Returning::tracker->state != 0,
-                                 PAYLOAD_DELIMITER,
-                                 0,
-                                 PAYLOAD_DELIMITER);
-      break;
-    case StateMachine::DELIVERING:
-      type = MT_HEARTBEAT_RESPONSE_DELIVERING;
-      sprintf(msg, "");
-      break;
-    case StateMachine::DISCONNECTED:
-      type = MT_HEARTBEAT_RESPONSE_DISCONNECTED;
-      // duration
-      sprintf(msg, "");
-      break;
-  }
-  queen->send(type, msg);
 }

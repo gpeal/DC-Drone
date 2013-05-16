@@ -6,8 +6,6 @@
 extern int DRONE_ID;
 
 void set_state_objects(void);
-void delegate_message(Message_t *message);
 void free_memory_check(void);
-void send_heartbeat(void);
 
 #endif

@@ -2,6 +2,8 @@
 #include "Sensor.h"
 #include "Tracker.h"
 
+int Sensor::laser_pin;
+
 Sensor::Sensor(int transistor_pin)
   :transistor_pin(transistor_pin)
 {
