@@ -6,6 +6,7 @@
  * as the state is RETURNING
  */
 
+
 #include "Metro.h"
 #include "tracker.h"
 
@@ -28,18 +29,19 @@ namespace StateMachine
     void measure(void);
     void skip(void);
     void drive(void);
+    void spin(int duty, int direction);
+    void enter(int state);
     extern Tracker *tracker;
     extern MotorDriver *motor_driver;
+    extern int returning_state;
+    extern long returning_state_enter_millis;
+
     extern int hit_count;
     extern int miss_count;
-    extern int state;
     extern int last_non_none_state;
-    extern Metro *search_timer;
-    extern int search_count;
-    // the time the drone started rotating to avoid the retroreflective tape that it
-    // found that isn't the nest
-    extern long skipping_millis;
-    extern long start_search_millis;
+    extern long last_non_none_millis;
+    extern const int LEFT;
+    extern const int RIGHT;
   }
 }
 

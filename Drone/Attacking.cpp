@@ -81,6 +81,7 @@ void StateMachine::Attacking::loop(void)
   if (tracker->state >> 1 & 1 == 1 && Sonar::prey_inches < 1.6 && Sonar::prey_inches > 0.1)
   {
     captured = 1;
+    enter(RETURNING);
   }
 }
 
