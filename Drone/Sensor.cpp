@@ -23,18 +23,22 @@ Sensor::Sensor(int transistor_pin)
  */
 void Sensor::calibrate()
 {
-  int delta_sum = 0;
+  int delta_sum = 0, delta_count = 0;
   make_reading();
   for(int i = 0; i < 50; i++)
   {
     toggle_laser();
     make_reading();
-    delta_sum += abs(last_delta);
+    if (last_delta > 0)
+    {
+      delta_sum += last_delta;
+      delta_count++;
+    }
     delay(10);
   }
 
-  running_average->fillValue((int)((float)delta_sum / 50), (int)(4 * (float)delta_sum / 50));
-  delta_threshold = (int)(4 * (float)delta_sum / 50);
+  running_average->fillValue((int)((float)delta_sum / delta_count), RUNNING_AVERAGE_SIZE);
+  delta_threshold = (int)(4 * (float)delta_sum / delta_count);
 
   debug->log("Delta threshold: %d", delta_threshold);
 }
