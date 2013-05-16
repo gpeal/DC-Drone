@@ -3,6 +3,7 @@
 
 #include <Metro.h>
 #include <Servo.h>
+#include "RunningAverage.h"
 
 #define CALIBRATION_SIZE 5
 #define CALIBRATION_DEFAULT 999
@@ -18,6 +19,8 @@
 
 #define SERVO_SEARCHING_SPEED 0.5
 #define SERVO_TRACKING_SPEED 0.5
+
+#define RUNNING_AVERAGE_SIZE 5
 
 class Sensor
 {
@@ -44,6 +47,7 @@ public:
   static int laser_pin;
   static void toggle_laser(void);
   static void set_laser_pin(int pin);
-
+private:
+  RunningAverage *running_average;
 };
 #endif

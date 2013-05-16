@@ -10,6 +10,7 @@ Sensor::Sensor(int transistor_pin)
   consecutive_hit_count = 0;
   // set this really high so it doesn't fire a hit during calibration
   delta_threshold = 9999;
+  running_average = new RunningAverage(RUNNING_AVERAGE_SIZE);
 }
 
 /**
@@ -30,7 +31,8 @@ void Sensor::calibrate()
     delay(10);
   }
 
-  delta_threshold = (int)(2.5 * (float)delta_sum / 50);
+  running_average->fillValue((int)((float)delta_sum / 50), (int)(4 * (float)delta_sum / 50));
+  delta_threshold = (int)(4 * (float)delta_sum / 50);
 
   debug->log("Delta threshold: %d", delta_threshold);
 }
@@ -52,6 +54,7 @@ void Sensor::make_reading(void)
     last_delta *= -1;
   }
 
+  running_average->addValue(last_delta);
   if (hit_prey())
   {
     last_found_millis = millis();
@@ -80,7 +83,7 @@ bool Sensor::hit_prey(void)
  */
 bool Sensor::recently_hit_prey(void)
 {
-  return consecutive_hit_count >= 3;
+  return running_average->getAverage() > delta_threshold;
 }
 
 void Sensor::set_laser_pin(int pin)
