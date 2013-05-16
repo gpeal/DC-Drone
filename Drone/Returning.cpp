@@ -5,29 +5,25 @@
 #include "StateMachine.h"
 #include "Utils.h"
 
-int StateMachine::Returning::hit_count = 0;
-int StateMachine::Returning::miss_count = 0;
-int StateMachine::Returning::state;
-int StateMachine::Returning::last_non_none_state;
 Tracker *StateMachine::Returning::tracker;
 MotorDriver *StateMachine::Returning::motor_driver;
-Metro *StateMachine::Returning::search_timer = new Metro(10, 1);
-int StateMachine::Returning::search_count;
-long StateMachine::Returning::skipping_millis;
-long StateMachine::Returning::start_search_millis;
+int StateMachine::Returning::returning_state;
+long StateMachine::Returning::returning_state_enter_millis;
+int StateMachine::Returning::hit_count;
+int StateMachine::Returning::miss_count;
+int StateMachine::Returning::last_non_none_state;
+long StateMachine::Returning::last_non_none_millis;
+const int StateMachine::Returning::LEFT = -1;
+const int StateMachine::Returning::RIGHT = 1;
 
 /**
  * This is automatically called when the state is entered
  */
 void StateMachine::Returning::enter(void)
 {
-  state = RETURNING_STATE_SEARCHING;
-  last_non_none_state = TRACKER_STATE_LEFT;
-  skipping_millis = 0;
-  search_count = 0;
-  hit_count = 0;
-  miss_count = 0;
-  start_search_millis = millis();
+  enter(RETURNING_STATE_SEARCHING);
+  last_non_none_state = TRACKER_STATE_NONE;
+  last_non_none_millis = millis();
 }
 
 void StateMachine::Returning::loop(void)
@@ -35,26 +31,19 @@ void StateMachine::Returning::loop(void)
   if (tracker->loop())
   {
     Sonar::loop();
-  }
-  else
-  {
-    return;
+    debug->log("S:%d", returning_state);
   }
 
-  switch (state)
+  if (tracker->state != TRACKER_STATE_NONE)
+  {
+    last_non_none_state = tracker->state;
+    last_non_none_millis = millis();
+  }
+
+  switch (returning_state)
   {
     case RETURNING_STATE_SEARCHING:
-      if (tracker->state == TRACKER_STATE_NONE)
-      {
-        search();
-      }
-      else
-      {
-        state = RETURNING_STATE_MEASURING;
-        miss_count = 0;
-        hit_count = 0;
-        motor_driver->set(0, 0);
-      }
+      search();
       break;
     case RETURNING_STATE_MEASURING:
       measure();
@@ -67,7 +56,7 @@ void StateMachine::Returning::loop(void)
       break;
   }
 
-  if (tracker->state != TRACKER_STATE_NONE && state != RETURNING_STATE_SKIPPING)
+  if (tracker->state != TRACKER_STATE_NONE && returning_state != RETURNING_STATE_SKIPPING)
   {
     last_non_none_state = tracker->state;
   }
@@ -78,32 +67,20 @@ void StateMachine::Returning::loop(void)
  */
 void StateMachine::Returning::search()
 {
-  int min_ticks = 4;
-  int max_ticks = 30;
-  int ramp_up_time = 5;
-  int ticks_to_skip =  (float)(millis() - start_search_millis) / 1000.0 * -(float)(max_ticks - min_ticks) / (float)ramp_up_time + max_ticks;
-  ticks_to_skip = cap(ticks_to_skip, min_ticks, max_ticks);
-
-  if (search_timer->check())
+  if (tracker->state == TRACKER_STATE_NONE)
   {
-    search_count++;
-    if (search_count % ticks_to_skip == 0)
+    if (last_non_none_state & 1 == 1)
     {
-      // the left laser hit in the last non none state
-      // turn left
-      if (last_non_none_state >> 2 == 1)
-      {
-        motor_driver->set(-255, 255);
-      }
-      else
-      {
-        motor_driver->set(255, -255);
-      }
+      spin(13, RIGHT);
     }
     else
     {
-      motor_driver->set(0, 0);
+      spin(13, LEFT);
     }
+  }
+  else
+  {
+    enter(RETURNING_STATE_MEASURING);
   }
 }
 
@@ -112,9 +89,9 @@ void StateMachine::Returning::search()
  */
 void StateMachine::Returning::skip(void)
 {
-  if (millis() - skipping_millis > 1000)
+  if (millis() - returning_state_enter_millis > 1000)
   {
-    state = RETURNING_STATE_SEARCHING;
+    enter(RETURNING_STATE_SEARCHING);
   }
 }
 
@@ -130,19 +107,18 @@ void StateMachine::Returning::measure(void)
   }
   // if enough data has been collected, determine whether or not it is the home base
   // and drive towards it or skip it
-  if (miss_count + hit_count > 250)
+  if (millis() - returning_state_enter_millis > 2000)
   {
     // less than 80% of the time it was hitting the tape
     // that means it was probably moving
     if ((float)hit_count / (float)(miss_count + hit_count) < 0.8)
     {
-      state = RETURNING_STATE_RETURNING;
+      enter(RETURNING_STATE_RETURNING);
     }
     // The tape didn't move. Probably not the nest
     else
     {
-      skipping_millis = millis();
-      state = RETURNING_STATE_SKIPPING;
+      enter(RETURNING_STATE_SKIPPING);
       // the left laser hit in the last non none state
       // turn left
       if (last_non_none_state & 4 == 1)
@@ -164,22 +140,53 @@ void StateMachine::Returning::drive(void)
   switch (tracker->state)
   {
     case TRACKER_STATE_NONE:
-      search();
+      if (last_non_none_state & 1 == 1)
+      {
+        spin(8, RIGHT);
+      }
+      else
+      {
+        spin(8, LEFT);
+      }
       break;
     case TRACKER_STATE_LEFT:
       motor_driver->set(245, 255);
-      start_search_millis = millis();
-      last_non_none_state = tracker->state;
       break;
     case TRACKER_STATE_RIGHT:
       motor_driver->set(255, 245);
-      start_search_millis = millis();
-      last_non_none_state = tracker->state;
       break;
     case TRACKER_STATE_LEFT_RIGHT:
       motor_driver->set(255, 255);
-      start_search_millis = millis();
-      last_non_none_state = tracker->state;
       break;
+  }
+}
+
+/**
+ * Turn the motors on for duty millis every 100 millis
+ * Direction takes RIGHT or LEFT
+ */
+void StateMachine::Returning::spin(int duty, int direction)
+{
+  if ((millis() - enter_millis) % 100 < duty)
+  {
+    motor_driver->set(direction * 255,  -direction * 255);
+  }
+  else
+  {
+    motor_driver->set(0, 0);
+  }
+}
+
+void StateMachine::Returning::enter(int state)
+{
+  returning_state = state;
+  returning_state_enter_millis = millis();
+
+  switch(returning_state)
+  {
+    case RETURNING_STATE_MEASURING:
+      hit_count = 0;
+      miss_count = 0;
+      motor_driver->set(0, 0);
   }
 }

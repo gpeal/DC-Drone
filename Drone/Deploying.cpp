@@ -17,5 +17,6 @@ void StateMachine::Deploying::loop(void)
   {
     motor_driver->set(0, 0);
     complete = true;
+    enter(SEARCHING);
   }
 }

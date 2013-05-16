@@ -32,6 +32,7 @@ void StateMachine::Searching::loop(void)
   if (tracker->state != TRACKER_STATE_NONE)
   {
     last_non_none_state = tracker->state;
+    enter(ATTACKING);
   }
 
   // the tracker has hit something before, just track it
