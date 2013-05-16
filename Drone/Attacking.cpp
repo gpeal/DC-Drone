@@ -19,9 +19,12 @@ void StateMachine::Attacking::enter(void)
 
 void StateMachine::Attacking::loop(void)
 {
+  int duty, direction, tracker_state;
+
   if (tracker->loop())
   {
     Sonar::loop();
+    debug->log("T%d", tracker->state);
   }
 
   if (tracker->state != TRACKER_STATE_NONE)
@@ -30,9 +33,18 @@ void StateMachine::Attacking::loop(void)
     last_hit_millis = millis();
   }
 
+  // prevent the drone from running into a wall
+  // if (tracker->state >> 1 & 1 != 1 && Sonar::prey_inches < 12 && Sonar::prey_inches > 0.1)
+  // {
+  //   tracker_state = TRACKER_STATE_NONE;
+  // }
+  // else
+  // {
+  //   tracker_state = tracker->state;
+  // }
+
   switch(tracker->state)
   {
-    int duty, direction;
     case TRACKER_STATE_NONE:
       // the right laser hit in the last non none state
       if (last_non_none_state & 1 == 1)
@@ -43,9 +55,9 @@ void StateMachine::Attacking::loop(void)
       {
         direction = LEFT;
       }
-      if (millis() - last_hit_millis < 3000)
+      if (millis() - last_hit_millis < 2000)
       {
-        duty = 15;
+        duty = 10;
       }
       else
       {
@@ -54,7 +66,7 @@ void StateMachine::Attacking::loop(void)
       spin(duty, direction);
       break;
     case TRACKER_STATE_RIGHT:
-      motor_driver->set(200, -200);
+      motor_driver->set(180, -180);
       break;
     case TRACKER_STATE_MIDDLE:
       motor_driver->set(255, 255);
@@ -63,7 +75,7 @@ void StateMachine::Attacking::loop(void)
       motor_driver->set(255, 200);
       break;
     case TRACKER_STATE_LEFT:
-      motor_driver->set(-200, 200);
+      motor_driver->set(-180, 180);
       break;
     case TRACKER_STATE_LEFT_RIGHT:
       motor_driver->set(255, 255);
@@ -91,7 +103,7 @@ void StateMachine::Attacking::loop(void)
  */
 void StateMachine::Attacking::spin(int duty, int direction)
 {
-  if ((millis() - enter_millis) % 100 < duty)
+  if (millis() % 100 < duty)
   {
     motor_driver->set(direction * 255,  -direction * 255);
   }

@@ -24,6 +24,7 @@ void StateMachine::Returning::enter(void)
   enter(RETURNING_STATE_SEARCHING);
   last_non_none_state = TRACKER_STATE_NONE;
   last_non_none_millis = millis();
+  motor_driver->set(0, 0);
 }
 
 void StateMachine::Returning::loop(void)
@@ -31,7 +32,11 @@ void StateMachine::Returning::loop(void)
   if (tracker->loop())
   {
     Sonar::loop();
-    debug->log("S:%d", returning_state);
+  }
+  // while we are still using the prey lasers for the home, wait to remove the captured prey before continuing
+  if (Sonar::prey_inches < 10 && Sonar::prey_inches > 0.1)
+  {
+    return;
   }
 
   if (tracker->state != TRACKER_STATE_NONE)

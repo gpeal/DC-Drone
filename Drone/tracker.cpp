@@ -41,7 +41,7 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_right)
 void Tracker::init(void)
 {
   state = TRACKER_STATE_NONE;
-  execute_timer = new Metro(15);
+  execute_timer = new Metro(1);
 }
 
 /**
