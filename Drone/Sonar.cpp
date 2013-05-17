@@ -17,10 +17,18 @@ void Sonar::loop(void)
   if (prey_sonar != NULL)
   {
     prey_inches = (float)prey_sonar->ping() / (float)US_ROUNDTRIP_IN;
+    if (prey_inches == NO_ECHO)
+    {
+      prey_inches = 999;
+    }
   }
   // if (nest_sonar != NULL)
   // {
   //   nest_inches = (float)nest_sonar->ping() / (float)US_ROUNDTRIP_IN;
+  //   if (nest_inches == NO_PING)
+        // {
+        //   nest_inches = 999;
+        // }
   // }
 
 

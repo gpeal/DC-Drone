@@ -12,8 +12,8 @@
 #include "Drone.h"
 #include "Motor.h"
 #include "MotorDriver.h"
+#include "Relocating.h"
 #include "Returning.h"
-#include "Searching.h"
 #include "Sensor.h"
 #include "Sonar.h"
 #include "StateMachine.h"
@@ -60,9 +60,6 @@ void set_state_objects(void)
 
   StateMachine::Deploying::motor_driver = motor_driver;
 
-  StateMachine::Searching::motor_driver = motor_driver;
-  StateMachine::Searching::tracker = tracker;
-
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
   Sonar::prey_sonar = new NewPing(5, 4, 50);
@@ -80,8 +77,8 @@ void loop()
     case StateMachine::DEPLOYING:
       StateMachine::Deploying::loop();
       break;
-    case StateMachine::SEARCHING:
-      StateMachine::Searching::loop();
+    case StateMachine::RELOCATING:
+      StateMachine::Relocating::loop();
       break;
     case StateMachine::ATTACKING:
       StateMachine::Attacking::loop();

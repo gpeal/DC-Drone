@@ -1,7 +1,7 @@
 #include "Arduino.h"
+#include "Attacking.h"
 #include "Deploying.h"
 #include "Returning.h"
-#include "Searching.h"
 #include "StateMachine.h"
 
 StateMachine::state_t StateMachine::_state;
@@ -29,11 +29,8 @@ void StateMachine::enter(state_t new_state)
     case DEPLOYING:
       Deploying::enter();
       break;
-    case SEARCHING:
-      Searching::enter();
-      break;
     case ATTACKING:
-      Searching::enter();
+      Attacking::enter();
       break;
     case RETURNING:
       Returning::enter();
