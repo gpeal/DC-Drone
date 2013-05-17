@@ -41,6 +41,7 @@ Tracker::Tracker(int transistor_pin_left, int transistor_pin_right)
 void Tracker::init(void)
 {
   state = TRACKER_STATE_NONE;
+  previous_state = TRACKER_STATE_NONE;
   execute_timer = new Metro(1);
 }
 
@@ -71,6 +72,7 @@ bool Tracker::loop(void)
       middle_hit = (int)middle_sensor->recently_hit_prey();
     }
 
+    previous_state = state;
     state = ((int)left_sensor->recently_hit_prey() << 2) | (middle_hit << 1) | ((int)right_sensor->recently_hit_prey());
     return true;
   }

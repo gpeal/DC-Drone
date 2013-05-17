@@ -18,6 +18,7 @@
 #define RETURNING_STATE_SKIPPING 2
 // found the nest, returning
 #define RETURNING_STATE_RETURNING 3
+#define RETURNING_STATE_DANCING 4
 
 namespace StateMachine
 {
@@ -29,7 +30,7 @@ namespace StateMachine
     void measure(void);
     void skip(void);
     void drive(void);
-    void spin(int duty, int direction);
+    void dance();
     void enter(int state);
     extern Tracker *tracker;
     extern MotorDriver *motor_driver;
@@ -40,8 +41,6 @@ namespace StateMachine
     extern int miss_count;
     extern int last_non_none_state;
     extern long last_non_none_millis;
-    extern const int LEFT;
-    extern const int RIGHT;
   }
 }
 

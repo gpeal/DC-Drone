@@ -11,8 +11,6 @@
 MotorDriver *StateMachine::Searching::motor_driver;
 Tracker *StateMachine::Searching::tracker;
 int StateMachine::Searching::last_non_none_state = TRACKER_STATE_NONE;
-const int StateMachine::Searching::LEFT = -1;
-const int StateMachine::Searching::RIGHT = 1;
 
 
 void StateMachine::Searching::enter(void)
@@ -41,26 +39,26 @@ void StateMachine::Searching::loop(void)
     switch(tracker->state)
     {
       case TRACKER_STATE_LEFT:
-        spin(15, LEFT);
+        motor_driver->spin(15, LEFT);
         break;
       case TRACKER_STATE_LEFT_MIDDLE:
-        spin(10, LEFT);
+        motor_driver->spin(10, LEFT);
         break;
       case TRACKER_STATE_MIDDLE_RIGHT:
-        spin(10, RIGHT);
+        motor_driver->spin(10, RIGHT);
         break;
       case TRACKER_STATE_RIGHT:
-        spin(15, RIGHT);
+        motor_driver->spin(15, RIGHT);
         break;
       case TRACKER_STATE_NONE:
         // the right laser hit in the last non none state
         if (last_non_none_state & 1 == 1)
         {
-          spin(15, RIGHT);
+          motor_driver->spin(15, RIGHT);
         }
         else
         {
-          spin(15, LEFT);
+          motor_driver->spin(15, LEFT);
         }
         break;
       default:
@@ -71,29 +69,13 @@ void StateMachine::Searching::loop(void)
   else
   {
     min_duty = 1;
-    max_duty = 20;
+    max_duty = 13;
     ramp_up_time = 5;
     duty =  (float)(millis() - enter_millis) / 1000.0 * (float)(max_duty - min_duty) / (float)ramp_up_time + min_duty;
     duty = cap(duty, min_duty, max_duty);
-    spin(duty, RIGHT);
+    motor_driver->spin(duty, RIGHT);
   }
 
 
 
-}
-
-/**
- * Turn the motors on for duty millis every 100 millis
- * Direction takes RIGHT or LEFT
- */
-void StateMachine::Searching::spin(int duty, int direction)
-{
-  if ((millis() - enter_millis) % 100 < duty)
-  {
-    motor_driver->set(direction * 255,  -direction * 255);
-  }
-  else
-  {
-    motor_driver->set(0, 0);
-  }
 }

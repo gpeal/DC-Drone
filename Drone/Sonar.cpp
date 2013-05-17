@@ -1,7 +1,7 @@
 #include "Debug.h"
 #include "Sonar.h"
 
-Metro *Sonar::sonar_timer = new Metro(50);
+Metro *Sonar::sonar_timer = new Metro(250);
 NewPing *Sonar::prey_sonar;
 NewPing *Sonar::nest_sonar;
 float Sonar::prey_inches = 0;
@@ -18,8 +18,14 @@ void Sonar::loop(void)
   {
     prey_inches = (float)prey_sonar->ping() / (float)US_ROUNDTRIP_IN;
   }
-  if (nest_sonar != NULL)
-  {
-    nest_inches = (float)nest_sonar->ping() / (float)US_ROUNDTRIP_IN;
-  }
+  // if (nest_sonar != NULL)
+  // {
+  //   nest_inches = (float)nest_sonar->ping() / (float)US_ROUNDTRIP_IN;
+  // }
+
+
+
+
+
+  nest_inches = prey_inches;
 }

@@ -13,8 +13,6 @@ int StateMachine::Returning::hit_count;
 int StateMachine::Returning::miss_count;
 int StateMachine::Returning::last_non_none_state;
 long StateMachine::Returning::last_non_none_millis;
-const int StateMachine::Returning::LEFT = -1;
-const int StateMachine::Returning::RIGHT = 1;
 
 /**
  * This is automatically called when the state is entered
@@ -34,10 +32,7 @@ void StateMachine::Returning::loop(void)
     Sonar::loop();
   }
   // while we are still using the prey lasers for the home, wait to remove the captured prey before continuing
-  if (Sonar::prey_inches < 10 && Sonar::prey_inches > 0.1)
-  {
-    return;
-  }
+  //
 
   if (tracker->state != TRACKER_STATE_NONE)
   {
@@ -59,6 +54,9 @@ void StateMachine::Returning::loop(void)
     case RETURNING_STATE_RETURNING:
       drive();
       break;
+    case RETURNING_STATE_DANCING:
+      dance();
+      break;
   }
 
   if (tracker->state != TRACKER_STATE_NONE && returning_state != RETURNING_STATE_SKIPPING)
@@ -74,18 +72,21 @@ void StateMachine::Returning::search()
 {
   if (tracker->state == TRACKER_STATE_NONE)
   {
-    if (last_non_none_state & 1 == 1)
+    if (motor_driver->spinning = false)
     {
-      spin(13, RIGHT);
-    }
-    else
-    {
-      spin(13, LEFT);
+      if (last_non_none_state & 1 == 1)
+      {
+        motor_driver->spin(0, 40, 10, RIGHT);
+      }
+      else
+      {
+        motor_driver->spin(0, 40, 10, LEFT);
+      }
     }
   }
   else
   {
-    enter(RETURNING_STATE_MEASURING);
+    enter(RETURNING_STATE_RETURNING);
   }
 }
 
@@ -147,11 +148,11 @@ void StateMachine::Returning::drive(void)
     case TRACKER_STATE_NONE:
       if (last_non_none_state & 1 == 1)
       {
-        spin(8, RIGHT);
+        motor_driver->spin(0, 40, 10, RIGHT);
       }
       else
       {
-        spin(8, LEFT);
+        motor_driver->spin(0, 40, 10, LEFT);
       }
       break;
     case TRACKER_STATE_LEFT:
@@ -164,23 +165,24 @@ void StateMachine::Returning::drive(void)
       motor_driver->set(255, 255);
       break;
   }
+
+  // if (Sonar::nest_inches < 6)
+  //   returning_state = RETURNING_STATE_DANCING;
+
 }
 
-/**
- * Turn the motors on for duty millis every 100 millis
- * Direction takes RIGHT or LEFT
- */
-void StateMachine::Returning::spin(int duty, int direction)
+void StateMachine::Returning::dance(void)
 {
-  if ((millis() - enter_millis) % 100 < duty)
+  if (millis() % 500 < 250)
   {
-    motor_driver->set(direction * 255,  -direction * 255);
+    motor_driver->set(255, -255);
   }
   else
   {
-    motor_driver->set(0, 0);
+    motor_driver->set(-255, 255);
   }
 }
+
 
 void StateMachine::Returning::enter(int state)
 {

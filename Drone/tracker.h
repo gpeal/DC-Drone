@@ -23,6 +23,7 @@ class Tracker
     Tracker(int transistor_pin_left, int transistor_pin_right);
     bool loop(void);
     void init(void);
+    int previous_state;
     int state;
     Sensor *left_sensor;
     Sensor *right_sensor;

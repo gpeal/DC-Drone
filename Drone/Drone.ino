@@ -23,6 +23,7 @@
 int DRONE_ID;
 
 Metro *free_memory_timer;
+MotorDriver *motor_driver;
 
 void setup()
 {
@@ -30,7 +31,7 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::SEARCHING);
+  StateMachine::enter(StateMachine::ATTACKING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -53,7 +54,7 @@ void set_state_objects(void)
 {
   MotorDriver::left_motor = new Motor(3, 12);
   MotorDriver::right_motor = new Motor(11, 13);
-  MotorDriver *motor_driver = MotorDriver::get_instance();
+  motor_driver = MotorDriver::get_instance();
 
   Tracker *tracker = new Tracker(0, 1, 4);
 
@@ -66,12 +67,14 @@ void set_state_objects(void)
   StateMachine::Attacking::tracker = tracker;
   Sonar::prey_sonar = new NewPing(5, 4, 50);
   // use the prey lasers until we get the top lasers
-  StateMachine::Returning::tracker = new Tracker(0, 1);
+  StateMachine::Returning::tracker = new Tracker(0, 4);
   StateMachine::Returning::motor_driver = motor_driver;
 }
 
 void loop()
 {
+  motor_driver->loop();
+
   switch(StateMachine::state())
   {
     case StateMachine::DEPLOYING:
