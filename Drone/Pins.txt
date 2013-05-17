@@ -1,20 +1,20 @@
 0-     Serial RX
 1-     Serial TX
-2-     Ultrasonic Sensor trig
-3-     Left Motor Speed
-4-     Prey Ultrasonic Sensor trigger (blue)
-5-     Nest Ultrasonic Sensor echo (green)
-6-     XBEE RX (white)
-7-     XBEE TX (blue)
-8-     Door servo 1
-9-     Door servo 2
+2-     Nest Ultrasonic Sensor trig (blue)
+3-     Nest Left Motor Speed (green)
+4-
+5-     Door servo 1
+6-     Door servo 2
+7-     Prey Ultrasonic Sensor trigger (blue)
+8-     Prey Ultrasonic Sensor echo (green)
+9-
 10-
 11-    Right Motor Speed
 12-    Left Motor Direction
 13-    Right Motor Direction
 A0/14- Left Phototransistor
 A1/15- Middle Phototransistor
-A2/16- Top Left Phototransistor
-A3/17- Top Right Phototransistor
-A4/18- Right Phototransistor
+A2/16- Right Phototransistor
+A3/17- Top Left Phototransistor
+A4/18- Top Right Phototransistor
 A5/19- Laser

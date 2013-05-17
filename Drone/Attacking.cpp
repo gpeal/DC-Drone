@@ -20,11 +20,10 @@ void StateMachine::Attacking::loop(void)
   int duty, direction, tracker_state;
 
   tracker->loop();
-  Sonar::loop();
 
   if (tracker->state == TRACKER_STATE_NONE)
   {
-    if (millis() - last_hit_millis > 5000)
+    if (millis() - last_hit_millis > 12000)
     {
       enter(RELOCATING);
       return;
@@ -34,8 +33,8 @@ void StateMachine::Attacking::loop(void)
   {
     last_non_none_state = tracker->state;
     last_hit_millis = millis();
+    Sonar::loop();
   }
-  debug->log("TS%d", tracker->state);
   switch(tracker->state)
   {
     case TRACKER_STATE_NONE:

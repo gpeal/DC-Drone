@@ -70,7 +70,7 @@ void StateMachine::Returning::loop(void)
  */
 void StateMachine::Returning::search()
 {
-  if (millis() - returning_state_enter_millis > 5000)
+  if (millis() - returning_state_enter_millis > 12000)
   {
     ::StateMachine::enter(RELOCATING);
   }
