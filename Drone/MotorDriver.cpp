@@ -16,6 +16,8 @@ void MotorDriver::loop(void)
 {
   int duty, speed;
   MotorDirection left_direction, right_direction;
+
+  // if the motor isn't spinning then there is nothing to do here
   if (spinning == false)
     return;
 
@@ -68,19 +70,32 @@ void MotorDriver::set(int left_speed, int right_speed)
 
   left_motor->set(abs(left_speed), left_direction);
   right_motor->set(abs(right_speed), right_direction);
-
 }
 
+/*
+ * Spin with a fixed duty cycle
+ */
 void MotorDriver::spin(int duty, int spin_direction)
 {
   spin(duty, duty, 1, spin_direction);
 }
 
+/**
+ * Spin the robot in spin_direction starting at min_duty and increasing
+ * to max_duty over ramp_up_time seconds
+ */
+
 void MotorDriver::spin(int min_duty, int max_duty, int ramp_up_time, int spin_direction)
 {
-  if (this->min_duty == min_duty && this->max_duty == max_duty && this->ramp_up_time == ramp_up_time && this->spin_direction == spin_direction)
+  // if the motor is already spinning with the same settings, don't reset it
+  // this makes it easier to call this function repeatedly when in the same state
+  // without having to make sure you only call it once
+  if (this->min_duty == min_duty &&
+      this->max_duty == max_duty &&
+      this->ramp_up_time == ramp_up_time &&
+      this->spin_direction == spin_direction &&
+      spinning == true)
     return;
-
   this->min_duty = min_duty;
   this->max_duty = max_duty;
   this->ramp_up_time = ramp_up_time;

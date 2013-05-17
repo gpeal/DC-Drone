@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "Attacking.h"
 #include "Deploying.h"
+#include "Relocating.h"
 #include "Returning.h"
 #include "StateMachine.h"
 
@@ -28,12 +29,19 @@ void StateMachine::enter(state_t new_state)
   {
     case DEPLOYING:
       Deploying::enter();
+      debug->log("Deploying");
       break;
     case ATTACKING:
       Attacking::enter();
+      debug->log("Attacking");
+      break;
+    case RELOCATING:
+      Relocating::enter();
+      debug->log("Relocating");
       break;
     case RETURNING:
       Returning::enter();
+      debug->log("Returning");
       break;
   }
 }

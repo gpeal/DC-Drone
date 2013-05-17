@@ -6,7 +6,6 @@ namespace StateMachine
   typedef enum  {
     IDLE = 0,       // 0
     DEPLOYING,      // 1
-    SEARCHING,      // 2
     RELOCATING,     // 3
     ATTACKING,      // 4
     SEARCHING_NEST, // 5

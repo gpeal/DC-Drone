@@ -60,9 +60,11 @@ void set_state_objects(void)
 
   StateMachine::Deploying::motor_driver = motor_driver;
 
+  StateMachine::Relocating::motor_driver = motor_driver;
+
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
-  Sonar::prey_sonar = new NewPing(5, 4, 50);
+  Sonar::prey_sonar = new NewPing(5, 4, 150);
   // use the prey lasers until we get the top lasers
   StateMachine::Returning::tracker = new Tracker(0, 4);
   StateMachine::Returning::motor_driver = motor_driver;
@@ -71,7 +73,6 @@ void set_state_objects(void)
 void loop()
 {
   motor_driver->loop();
-
   switch(StateMachine::state())
   {
     case StateMachine::DEPLOYING:
@@ -82,6 +83,7 @@ void loop()
       break;
     case StateMachine::ATTACKING:
       StateMachine::Attacking::loop();
+  debug->log("Spinning7: %d", (int)motor_driver->spinning);
       break;
     case StateMachine::RETURNING:
       StateMachine::Returning::loop();

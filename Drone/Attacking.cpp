@@ -11,7 +11,7 @@ int StateMachine::Attacking::captured;
 void StateMachine::Attacking::enter(void)
 {
   last_non_none_state = TRACKER_STATE_NONE;
-  last_hit_millis = 0;
+  last_hit_millis = millis();
   captured = 0;
 }
 
@@ -24,9 +24,10 @@ void StateMachine::Attacking::loop(void)
 
   if (tracker->state == TRACKER_STATE_NONE)
   {
-    if (last_non_none_state != TRACKER_STATE_NONE && millis() - last_hit_millis > 5000)
+    if (millis() - last_hit_millis > 5000)
     {
       enter(RELOCATING);
+      return;
     }
   }
   else
@@ -34,7 +35,7 @@ void StateMachine::Attacking::loop(void)
     last_non_none_state = tracker->state;
     last_hit_millis = millis();
   }
-
+  debug->log("TS%d", tracker->state);
   switch(tracker->state)
   {
     case TRACKER_STATE_NONE:

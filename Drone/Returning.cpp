@@ -76,7 +76,7 @@ void StateMachine::Returning::search()
   }
   if (tracker->state == TRACKER_STATE_NONE)
   {
-    if (motor_driver->spinning = false)
+    if (motor_driver->spinning == false)
     {
       if (last_non_none_state & 1 == 1)
       {
