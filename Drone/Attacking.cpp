@@ -22,7 +22,14 @@ void StateMachine::Attacking::loop(void)
   tracker->loop();
   Sonar::loop();
 
-  if (tracker->state != TRACKER_STATE_NONE)
+  if (tracker->state == TRACKER_STATE_NONE)
+  {
+    if (last_non_none_state != TRACKER_STATE_NONE && millis() - last_hit_millis > 5000)
+    {
+      enter(RELOCATING);
+    }
+  }
+  else
   {
     last_non_none_state = tracker->state;
     last_hit_millis = millis();
@@ -61,7 +68,7 @@ void StateMachine::Attacking::loop(void)
   // check if we captured the prey
   // if middle laser hit and distance < 1.6 in
   // an undefined reading returns 0 so ignore that too
-  if (tracker->state >> 1 & 1 == 1 && Sonar::prey_inches < 1.6 && Sonar::prey_inches > 0.1)
+  if (tracker->state >> 1 & 1 == 1 && Sonar::prey_inches < 1.6)
   {
     captured = 1;
     enter(RETURNING);

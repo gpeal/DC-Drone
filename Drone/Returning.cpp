@@ -70,6 +70,10 @@ void StateMachine::Returning::loop(void)
  */
 void StateMachine::Returning::search()
 {
+  if (millis() - returning_state_enter_millis > 5000)
+  {
+    ::StateMachine::enter(RELOCATING);
+  }
   if (tracker->state == TRACKER_STATE_NONE)
   {
     if (motor_driver->spinning = false)
