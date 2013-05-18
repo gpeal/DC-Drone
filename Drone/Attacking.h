@@ -6,9 +6,10 @@
  * as the state is ATTACKING
  */
 
+#include <Metro.h>
+#include <Servo.h>
 #include "MotorDriver.h"
 #include "Tracker.h"
-#include <Metro.h>
 
 namespace StateMachine
 {
@@ -21,6 +22,8 @@ namespace StateMachine
     extern int last_non_none_state;
     extern long last_hit_millis;
     extern int captured;
+    extern Servo *left_servo;
+    extern Servo *right_servo;
   }
 }
 

@@ -30,5 +30,5 @@ void Sonar::loop(void)
       nest_inches = 999;
     }
   }
-
+  debug->log("Prey: %d\t%d", (int)prey_inches, (int)nest_inches);
 }

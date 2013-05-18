@@ -32,10 +32,10 @@ void setup()
 {
   DRONE_ID = EEPROM.read(DRONE_ID_EEPROM);
   debug->log("Starting UP Drone %d", DRONE_ID);
+  set_state_objects();
 
   // initial state
-  StateMachine::enter(StateMachine::RELOCATING);
-  StateMachine::_previous_state = StateMachine::RELOCATING;
+  StateMachine::enter(StateMachine::DEPLOYING);
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -46,7 +46,6 @@ void setup()
   Sensor::set_laser_pin(9);
   Sensor::laser_state = HIGH;
 
-  set_state_objects();
 
   free_memory_timer = new Metro(10000);
   // debug->log("Battery Voltage: %d", (int)readVcc());
@@ -69,6 +68,16 @@ void set_state_objects(void)
 
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
+  Servo *left_servo = new Servo();
+  left_servo->attach(6);
+  left_servo->write(0);
+  Servo *right_servo = new Servo();
+  right_servo->attach(5);
+  right_servo->write(0);
+  StateMachine::Attacking::left_servo = left_servo;
+  StateMachine::Attacking::right_servo = right_servo;
+
+
   Sonar::prey_sonar = new NewPing(7, 8, 500);
   Sonar::nest_sonar = new NewPing(2, 4, 500);
   // use the prey lasers until we get the top lasers
@@ -78,6 +87,13 @@ void set_state_objects(void)
 
 void loop()
 {
+  // StateMachine::Attacking::tracker->loop();
+  // StateMachine::Attacking::motor_driver->set(255, 255);
+  // delay(2000);
+  // StateMachine::Attacking::motor_driver->set(-255, -255);
+  // return;
+
+
   motor_driver->loop();
   switch(StateMachine::state())
   {

@@ -152,11 +152,11 @@ void StateMachine::Returning::drive(void)
     case TRACKER_STATE_NONE:
       if (last_non_none_state & 1 == 1)
       {
-        motor_driver->spin(0, 40, 10, RIGHT);
+        motor_driver->spin(8, 30, 5, RIGHT);
       }
       else
       {
-        motor_driver->spin(0, 40, 10, LEFT);
+        motor_driver->spin(8, 30, 5, LEFT);
       }
       break;
     case TRACKER_STATE_LEFT:
@@ -170,8 +170,16 @@ void StateMachine::Returning::drive(void)
       break;
   }
 
-  // if (Sonar::nest_inches < 6)
-  //   returning_state = RETURNING_STATE_DANCING;
+  if (Sonar::nest_inches < 6)
+  {
+    motor_driver->set(255, 255);
+    delay(3500);
+    motor_driver->set(-255, -255);
+    delay(3500);
+    motor_driver->set(255, -255);
+    delay(1800);
+    enter(ATTACKING);
+  }
 
 }
 

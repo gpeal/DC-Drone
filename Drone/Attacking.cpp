@@ -7,20 +7,21 @@ Tracker *StateMachine::Attacking::tracker;
 int StateMachine::Attacking::last_non_none_state;
 long StateMachine::Attacking::last_hit_millis;
 int StateMachine::Attacking::captured;
+Servo *StateMachine::Attacking::left_servo;
+Servo *StateMachine::Attacking::right_servo;
 
 void StateMachine::Attacking::enter(void)
 {
   last_non_none_state = TRACKER_STATE_NONE;
   last_hit_millis = millis();
   captured = 0;
+  left_servo->write(0);
+  right_servo->write(100);
 }
 
 void StateMachine::Attacking::loop(void)
 {
   int duty, direction, tracker_state;
-
-  Sonar::loop();
-
 
   tracker->loop();
 
@@ -32,7 +33,7 @@ void StateMachine::Attacking::loop(void)
       return;
     }
   }
-  else
+  else // state non none
   {
     last_non_none_state = tracker->state;
     last_hit_millis = millis();
@@ -74,6 +75,8 @@ void StateMachine::Attacking::loop(void)
   if (tracker->state >> 1 & 1 == 1 && Sonar::prey_inches < 1.6)
   {
     captured = 1;
+    left_servo->write(100);
+    right_servo->write(0);
     enter(RETURNING);
     delay(3000);
   }
