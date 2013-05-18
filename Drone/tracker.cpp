@@ -74,6 +74,7 @@ bool Tracker::loop(void)
 
     previous_state = state;
     state = ((int)left_sensor->recently_hit_prey() << 2) | (middle_hit << 1) | ((int)right_sensor->recently_hit_prey());
+    debug->log("%d\t%d\t%d", left_sensor->last_reading, middle_sensor->last_reading, right_sensor->last_reading);
     return true;
   }
   return false;

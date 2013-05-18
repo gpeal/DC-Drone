@@ -3,9 +3,10 @@
 
 #include "MotorDriver.h"
 
-#define THRESHOLD_DISTANCE 100
+#define THRESHOLD_DISTANCE 60
 #define RELOCATED_DISTANCE 30
 #define MAX_RELOCATION_TIME 5000
+#define MIN_RELOCATION_TIME 2000
 #define relocating() relocating_start_time != 0
 
 namespace StateMachine

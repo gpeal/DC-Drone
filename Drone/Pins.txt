@@ -1,8 +1,8 @@
 0-     Serial RX
 1-     Serial TX
-2-     Nest Ultrasonic Sensor trig (blue)
-3-     Nest Left Motor Speed (green)
-4-
+2-     Nest Ultrasonic Sensor trigger (blue)
+3-     PWMA
+4-     Nest Left Motor echo (green)
 5-     Door servo 1
 6-     Door servo 2
 7-     Prey Ultrasonic Sensor trigger (blue)
@@ -18,3 +18,9 @@ A2/16- Right Phototransistor
 A3/17- Top Left Phototransistor
 A4/18- Top Right Phototransistor
 A5/19- Laser
+
+
+
+RESISTORS
+Phototransistor -- 10K
+2n2222 -- 10 ohm between pin and base and 10 ohm between base and ground

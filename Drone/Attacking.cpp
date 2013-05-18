@@ -19,6 +19,9 @@ void StateMachine::Attacking::loop(void)
 {
   int duty, direction, tracker_state;
 
+  Sonar::loop();
+
+
   tracker->loop();
 
   if (tracker->state == TRACKER_STATE_NONE)
@@ -50,7 +53,7 @@ void StateMachine::Attacking::loop(void)
       motor_driver->set(255, 255);
       break;
     case TRACKER_STATE_MIDDLE_RIGHT:
-      motor_driver->set(255, 200);
+      motor_driver->set(255, 220);
       break;
     case TRACKER_STATE_LEFT:
       motor_driver->spin(15, LEFT);
@@ -59,7 +62,7 @@ void StateMachine::Attacking::loop(void)
       motor_driver->set(255, 255);
       break;
     case TRACKER_STATE_LEFT_MIDDLE:
-      motor_driver->set(200, 255);
+      motor_driver->set(220, 255);
       break;
     case TRACKER_STATE_LEFT_MIDDLE_RIGHT:
       motor_driver->set(255, 255);

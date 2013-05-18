@@ -22,18 +22,13 @@ void Sonar::loop(void)
       prey_inches = 999;
     }
   }
-  // if (nest_sonar != NULL)
-  // {
-  //   nest_inches = (float)nest_sonar->ping() / (float)US_ROUNDTRIP_IN;
-  //   if (nest_inches == NO_PING)
-        // {
-        //   nest_inches = 999;
-        // }
-  // }
+  if (nest_sonar != NULL)
+  {
+    nest_inches = (float)nest_sonar->ping() / (float)US_ROUNDTRIP_IN;
+    if (nest_inches == NO_ECHO)
+    {
+      nest_inches = 999;
+    }
+  }
 
-
-
-
-
-  nest_inches = prey_inches;
 }

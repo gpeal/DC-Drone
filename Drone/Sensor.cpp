@@ -3,6 +3,7 @@
 #include "Tracker.h"
 
 int Sensor::laser_pin;
+int Sensor::laser_state;
 
 Sensor::Sensor(int transistor_pin)
   :transistor_pin(transistor_pin)
@@ -23,7 +24,7 @@ Sensor::Sensor(int transistor_pin)
  */
 void Sensor::calibrate()
 {
-  delta_threshold = 20;
+  delta_threshold = 15;
 }
 
 /**
@@ -88,6 +89,15 @@ void Sensor::toggle_laser(void)
     debug->logl(ERROR, "Laser toggled before being set");
     return;
   }
-  int laser_value = digitalRead(laser_pin);
-  digitalWrite(laser_pin, !laser_value);
+  // int laser_value = digitalRead(laser_pin);
+  if (laser_state == LOW)
+  {
+    laser_state = HIGH;
+    digitalWrite(laser_pin, HIGH);
+  }
+  else
+  {
+    laser_state = LOW;
+    digitalWrite(laser_pin, LOW);
+  }
 }

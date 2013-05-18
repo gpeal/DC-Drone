@@ -44,6 +44,7 @@ public:
   bool recently_hit_prey(void);
   // there should only be 1 laser pin for all of the sensors
   // the laser also needs to be accessible for the sensor in its calibration routine
+  static int laser_state;
   static int laser_pin;
   static void toggle_laser(void);
   static void set_laser_pin(int pin);

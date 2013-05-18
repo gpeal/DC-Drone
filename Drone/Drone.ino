@@ -19,6 +19,9 @@
 #include "StateMachine.h"
 #include "Tracker.h"
 #include "Utils.h"
+/*
+ * Drone is our robot for the Northwestern Design Competition
+ */
 
 int DRONE_ID;
 
@@ -31,7 +34,8 @@ void setup()
   debug->log("Starting UP Drone %d", DRONE_ID);
 
   // initial state
-  StateMachine::enter(StateMachine::ATTACKING);
+  StateMachine::enter(StateMachine::RELOCATING);
+  StateMachine::_previous_state = StateMachine::RELOCATING;
 
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
@@ -39,7 +43,8 @@ void setup()
   pinMode(A3, INPUT);
   pinMode(A4, INPUT);
   pinMode(A5, OUTPUT);
-  Sensor::set_laser_pin(19);
+  Sensor::set_laser_pin(9);
+  Sensor::laser_state = HIGH;
 
   set_state_objects();
 
@@ -64,9 +69,10 @@ void set_state_objects(void)
 
   StateMachine::Attacking::motor_driver = motor_driver;
   StateMachine::Attacking::tracker = tracker;
-  Sonar::prey_sonar = new NewPing(8, 7, 500);
+  Sonar::prey_sonar = new NewPing(7, 8, 500);
+  Sonar::nest_sonar = new NewPing(2, 4, 500);
   // use the prey lasers until we get the top lasers
-  StateMachine::Returning::tracker = new Tracker(0, 1);
+  StateMachine::Returning::tracker = new Tracker(3, 4);
   StateMachine::Returning::motor_driver = motor_driver;
 }
 
