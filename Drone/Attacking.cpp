@@ -38,10 +38,10 @@ void StateMachine::Attacking::loop(void)
   switch(tracker->state)
   {
     case TRACKER_STATE_NONE:
-      if (last_non_none_state & 1 == 1)
-        motor_driver->spin(25, RIGHT);
+      if (last_non_none_state >> 2 & 1 == 1)
+        motor_driver->spin(7, 33, 3, LEFT);
       else
-        motor_driver->spin(25, LEFT);
+        motor_driver->spin(7, 33, 3, RIGHT);
       break;
     case TRACKER_STATE_RIGHT:
       motor_driver->spin(15, RIGHT);
