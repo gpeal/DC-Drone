@@ -52,9 +52,11 @@ void StateMachine::Attacking::loop(void)
       break;
     case TRACKER_STATE_MIDDLE:
       motor_driver->set(255, 255);
+      delay(50);
       break;
     case TRACKER_STATE_MIDDLE_RIGHT:
       motor_driver->set(255, 220);
+      delay(10);
       break;
     case TRACKER_STATE_LEFT:
       motor_driver->spin(15, LEFT);
@@ -64,6 +66,7 @@ void StateMachine::Attacking::loop(void)
       break;
     case TRACKER_STATE_LEFT_MIDDLE:
       motor_driver->set(220, 255);
+      delay(10);
       break;
     case TRACKER_STATE_LEFT_MIDDLE_RIGHT:
       motor_driver->set(255, 255);
@@ -77,7 +80,15 @@ void StateMachine::Attacking::loop(void)
     captured = 1;
     left_servo->write(100);
     right_servo->write(0);
-    enter(RETURNING);
+    // enter(RETURNING);
     delay(3000);
+    if (Sonar::prey_sonar->ping_in() < 1.6)
+    {
+    motor_driver->set(255, 255);
+    while (Sonar::nest_sonar->ping_in() > 4) { }
+    motor_driver->set(0, 0);
+    if (Sonar::prey_sonar->ping_in() < 1.6)
+      enter(IDLE);
+    }
   }
 }

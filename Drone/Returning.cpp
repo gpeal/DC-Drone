@@ -167,6 +167,7 @@ void StateMachine::Returning::drive(void)
       break;
     case TRACKER_STATE_LEFT_RIGHT:
       motor_driver->set(255, 255);
+      delay(50);
       break;
   }
 
